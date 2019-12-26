@@ -2,16 +2,17 @@
   "name": "ruby-object-model",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "directories": {
-    "example": "examples"
-  },
   "scripts": {
-    "html": "echo \"Error: no test specified\" && exit 1"
+    "html": "npx marked -i ruby-object-model.md -o output/ruby-object-model.html",
+    "pdf": "npx md-to-pdf ruby-object-model.md output/ruby-object-model.pdf",
+    "toc": "npx markdown-toc ruby-object-model.md -i",
+    "all": "rm -rf output && mkdir -p output && npm run toc && npm run html && npm run pdf"
   },
-  "author": "",
+  "author": "Sebastián Gurin",
   "license": "ISC",
   "devDependencies": {
-    "marked": "^0.8.0"
+    "markdown-toc": "^1.2.0",
+    "marked": "^0.8.0",
+    "md-to-pdf": "^2.8.2"
   }
 }

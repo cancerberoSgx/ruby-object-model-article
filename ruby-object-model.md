@@ -1,5 +1,22 @@
 # The Ruby Object Model
 
+<!-- toc -->
+
+- [About this document](#about-this-document)
+- [scope and context object](#scope-and-context-object)
+  * [self: the default namespace](#self-the-default-namespace)
+  * [scope and declarations](#scope-and-declarations)
+  * [global context](#global-context)
+- [class and module](#class-and-module)
+  * [the instance scope](#the-instance-scope)
+  * [the singleton scope](#the-singleton-scope)
+- [messages](#messages)
+  * [message block](#message-block)
+- [Operators](#operators)
+- [Blocks](#blocks)
+
+<!-- tocstop -->
+
 ## About this document
 
 When it comes to modeling a problem using an object oriented fashion, each language has its own peculiarities when it comes to defining new objects, declaring classes, object instantiation, code scope, etc. 
@@ -135,4 +152,4 @@ To know if a message block was passed we use  TODO
 
 ## Blocks
 
-A block is a special kind of object that contains executable code. In fact, all Ruby code is evaluated in the context of a block. Many other blocks can be declared and since they are just objects they can be used like any object. Particularly, as seen they can be passed in the payload of a message.
+A block is a special kind of object that contains executable code. In fact, all Ruby code is evaluated in the context of a block. Many other blocks can be declared and since they are just objects they can be used like any object. Particularly, as seen in [message block](#message-block), they can be passed in the payload of a message.
