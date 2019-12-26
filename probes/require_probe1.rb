@@ -1,15 +1,57 @@
 # frozen_string_literal: true
 
+class String
+  def trim
+    strip
+  end
+end
+# class Array
+#   alias each_and_index each
+# end
+p ' asd a  '.trim
+# [1, 2, 3].each { |_item, i| p i }
+
+# frozen_string_literal: true
+p methods
+module Module1
+  p self # Module1
+  p self.class # Module
+  @foo = 123
+  p instance_variables # [:@foo]
+  def method1
+    p self
+    p instance_variables
+    p self.class.instance_variables
+  end
+end
+
+class A
+  include Module1
+end
+a = A.new
+a.method1
+
+p 2.yield_self { |n| n * 3.14 } # prints 6.28
+
+def name_starts_with(data, name_prefix)
+  data
+    .then { |persons| persons.map { |person| person[:name] } }
+    .then { |names| names.select { |name| name.start_with? name_prefix } }
+    .then(&:sort)
+end
+p name_starts_with [{ name: 'andrew' }, { name: 'laura' }], 'a'
+
 class Array
   def some
     i = 0
     while i < length
       return self[i] if yield self[i], i
+
       i += 1
     end
   end
 end
-[1, 2, 3, 4, 5].some() do |n|
+[1, 2, 3, 4, 5].some do |n|
   print n
   n > 2
 end
@@ -38,9 +80,6 @@ end
 #     p self                # #<Class1:0x00007fc66691d938>
 #   end
 # end
-
-
-
 
 # # outside a class or module, "self" references the "main" context object
 # p self.instance_variables # []
