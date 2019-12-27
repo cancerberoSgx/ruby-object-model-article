@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
+a = 123
+
+p String.superclass
+p ''.class
 class String
   def trim
     strip
   end
 end
-# class Array
-#   alias each_and_index each
-# end
 p ' asd a  '.trim
 # [1, 2, 3].each { |_item, i| p i }
 

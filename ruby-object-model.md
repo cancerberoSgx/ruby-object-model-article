@@ -5,13 +5,19 @@
 <!-- toc -->
 
   * [About this document](#about-this-document)
-  * [scope and context object](#scope-and-context-object)
+  * [The basics](#the-basics)
+    + [Objects and classes](#objects-and-classes)
+    + [Instance variables](#instance-variables)
+    + [Methods](#methods)
+  * [Scope and the current object](#scope-and-the-context-object)
     + [self: the default object](#self-the-default-object)
-    + [scope and class declarations](#scope-and-class-declarations)
+    + [Scope Gates `class`, `module` and `def`](#scope-gates-class-module-and-def)
   * [declarations](#declarations)
-  * [class and module](#class-and-module)
-    + [module declarations](#module-declarations)
-  * [messages](#messages)
+    + [Open class](#open-class)
+    + [class declaration](#class-declaration)
+    + [module declaration](#module-declaration)
+  * [message & method](#message--method)
+    + [simple example](#simple-example)
     + [message syntax](#message-syntax)
     + [method syntax](#method-syntax)
     + [message block](#message-block)
@@ -40,53 +46,106 @@ When we talk about *object model* we are referring basically to these aspects:
  * how to declare object classes, instance methods, properties, etc
  * how to declare class inheritance and access the class hierarchy (call super)
 
-This document tries to give a detailed description of how these things works and can be written in Ruby. Particular emphasis is made on Ruby peculiarities compared to other programming languages. So, more than an Object Oriented Programming manual for Ruby, this document should be considered as descriptions on how objects work, understanding class declarations and Ruby peculiarities when dealing with objects and classes.
+This document tries to give a detailed description of how these things works and can be written in Ruby. Particular emphasis is made on Ruby peculiarities compared to other programming languages such as scope, class expressions, . So, more than an Object Oriented Programming manual for Ruby, this document should be considered as descriptions on how objects work, understanding class declarations and Ruby peculiarities when dealing with objects and classes.
 
 It assumes the reader has some background on object oriented programming such as the concepts of object, class, message, method and inheritance. Basic Ruby background is recommended although not needed since the code snippets are simple and commented.
 
-## scope and context object
+Aside, this is a millennial-friendly document: short paragraphs and code snippets right away!
 
-Although the concept of *scope* might seem not directly related with objects and classes, it plays a critical role while dealing with objects and classes in ruby. That's why this document starts describing it.
+## The basics
 
-Similar to other scripting languages understanding the rules for the scope on which the code we write is evaluated is critical. And also like other languages, there's a particular object in the scope that represents *"the thing we are talking about now"*, more formally often called the *context object*. 
+Let's start by explaining how to define a class and create new object instances in Ruby. In following sections we will be explaining exactly what's happening and how it works in detail, right now the objective is just making sure we know how to do it. 
 
-Most languages represent this object with a keyword, in Ruby the keyword `self` is used, while in other programming languages the `this` keyword os often used.
+The following code defines a class named `Orc`, with a method `eat`. When `eat` method is called an instance variable `@energy` is created by assigning it to a value. After the class definition, we then create an `Orc` instance and store it in local variable `fred`:
 
-Depending on which part of the code you are, `self` represents different things. It's always present in any piece of code is evaluated. And, in Ruby, it cannot be re-assigned. 
+```rb
+class Orc
+  def eat
+    @energy = 100
+  end
+end
+fred = Orc.new
+```
+
+
+
+<!-- As you can see, we used `class` to declare a new class. 
+The class defines two methods: `initialize` and `eat`. The method `initialize` is analogous to Java or JavaScript `constructor` in the sense that will be called when new instances are created. On it we define an *instance variable* called `@energy` by just assigning it a value. -->
+
+<!--    Relationship between objects, classes, methods and variables -->
+
+
+### Objects and classes
+
+In Ruby everything is an object, and every object is associated with a class of which we say it's an *instance* of. An object's class can be accessed through the method `class`. Even classes themselves are instances of a class named `Class`. Notice in the previous code that the expression `Orc.new` is actually calling `Class`'s method `new`. The following code tries to describe this:
+
+```rb
+fred = Orc.new
+fred.class # => Orc
+Orc.class  # => Class
+```
+
+### Instance variables
+
+Unlike in Java or other static languages, in Ruby there is no connection between an object's class and its instance variables. Instance variables just spring into existence when you assign them a value. For example, in the previous example, the instance variable `@energy` is assigned only when the method `eat` is called. If it's not then the instance variable is never defined. In conclusion we could have Orcs with and without `@energy` instance variable. 
+
+You can think of the names and values of instance variables as keys and values in a hash. Both the keys and the values can be different for each object.
+
+### Methods
+
+Besides instance variables objects also have methods. But unlike instance variables, objects that share the same class also share the same methods, so methods are stored in the object's class and not in the object itself as instance variables.
+
+The following image tries to illustrate the relationship between objects, classes, instance variables and methods. 
+
+![Figure 1-1](diagrams/instance_variables_methods_classes_objects.png)
+
+
+
+## Scope and the current object
+
+Although the concept of *scope* might seem not directly related with objects and classes, it plays a critical role while dealing with them in Ruby. 
+
+Similar to other scripting languages understanding the rules for the scope on which the code we write runs is critical. And also like other languages, there's a particular object in the scope that represents *"the thing we are talking about now"*, more formally often called the *current object*. 
+
+Most languages represent this object with a keyword, in Ruby the keyword `self` is used, while in other programming languages the `this` keyword is often used.
+
+Depending on which part of the code you are, `self` represents different things. It's always present and, in Ruby, it cannot be re-assigned. 
 
 ### self: the default object
 
-The primordial operation objects must support is to receive messages. The context object, this is `self`, acts as the default object when the message receiver is not specified. For example, the following two statements are equivalent:
+The primordial operation objects must support is to receive messages. The current object, this is `self`, acts as the default object when the message receiver is not specified. For example, the following two statements are equivalent:
 
 ```rb
 a = self.to_s
 b = to_s
 ```
 
-As you can see in the second line, we send a message `to_s` without providing the target object, so the message will be actually be dispatched to `self`, the context object.
+As you can see in the second line, we send a message `to_s` without providing the target object, so the message will be actually be dispatched to `self`, the current object.
 
-### scope and class declarations
+### Scope Gates `class`, `module` and `def`
 
-Besides being the default object for messages, in Ruby, the context object plays a principal role while declaring classes.
+<!-- Besides being the default object for messages, `self` plays an important role while declaring classes.  -->
 
 In ruby, there is no real distinction between code that defines a class and code of any other kind. In a sense, the `class` keyword is more like a *scope operator* than a class declaration. Yes, it creates classes that don't yet exist, but this could be considered just as a nice side effect: the core job of `class` is to *move you to the scope of a class* so you can declare methods. 
 
-For declaring classes we must change the scope (`self`) using `class`, and `def` expressions. 
+There are exactly three places where a program leaves the previous scope behind and opens a new one: 
 
-Inside a method declaration, `self` references *the instance*, similar to the `this` keyword in other programming languages. 
+ * Class definitions
+ * Module definitions
+ * Methods
 
-Inside a class declaration and outside a method, `self` references *the class*.
+And these three places are respectively marked with the keywords `class`, `module`, `def`. When opening one of these *scope gates*, the current scope is replaced so current local variables won't be visible form within the new `class` code.
 
-The following code tries to illustrate how the scope changes through different parts of the code. Notice how `class` and `def` are used to change the context object (`self`) where written code runs:
+<!-- For declaring classes we must change the `self` using `class`, and `def` expressions.  -->
+
+The following tries to illustrate how the scope changes through different parts of the code when defining a class. Notice how `class` and `def` are used to change the meaning of `self`, first to a new class `Class1` and then referencing the instance, so we are able to declare classes, instance methods, class methods, etc:
 
 ```rb
-# outside a class or module, "self" references the "main" context object
-p self.instance_variables # []
-# declaring a variable outside class or module is equivalent to declare an instance variable on "self.class"
-@foo = 1
-p self.instance_variables # [:foo]
-
+p self # main
+x = 1
 class Class1
+  # previous local variable "x" is not visible from here
+
   # inside a class but outside methods, "self" references the class
   p self # Class1
 
@@ -102,17 +161,25 @@ class Class1
     p self # Class1
   end
 end
-
 a = Class1.new
 a.method1
 Class1.method2
 ```
 
+Notice how:
+
+ * Inside a method declaration, `self` references *the instance*, similar to the `this` keyword in other programming languages. 
+ * Inside a class declaration and outside a method, `self` references *the class*.
+
+###
+
 ## declarations
 
-we've already seen in [Scope and class declarations](#scope-and-class-declarations), how to change the scope using `class` to declare a new class and `def` to declare instance methods.
+We've already seen in [Scope Gates](#scope-gates), how to change the scope using `class` to declare classes and `def` to declare methods.
 
-`class` declarations like previously shown have some peculiarities in ruby compared to other programming languages. As said at TODO, these declarations can be understood as scope change so "multiple declarations" are allowed and each of them will be incrementally modifying that class or module context object, this is `self`. 
+### Open class
+
+The `class` keyword being a scope operator (that opens the class scope so we can define methods in it) has a practical consequence: we can *reopen existing classes* - even standard library's - and modify them on the fly. This technique is often known as *Open Class* or *Monkeypatch*.
 
 This allows to partition a class declaration in several files:
 
@@ -142,22 +209,17 @@ end
 p '  asd ss '.trim
 ```
 
+### class declaration
 
-<!-- 
+TODO: expand previous example with inheritance, super, class instance, class method
 
-## class and module
-  runs scope on the code rubs which methods run or are declared, is very important and in the scope there is a  and represented with a keyword, `self` in the case of Ruby.
-Any code that is evaluated, it is so, in association with a context object. This object is the default object for messages without a receiver -->
-
-
-
-### module declarations
+### module declaration
 
 The keyword `module` can be used to change the scope to a `class` with the only difference that instead of common class inheritance where the parent class is declared, a `module` is `include`d explicitly by any class. Since a class can `include` several modules, this provides with an alternative to class inheritance when multiple inheritance is needed. This somewhat remembers JavaScript object mixin. 
 
 Think of modules as a syntax to declare the "composition" part in "composition vs inheritance" discussions (TODO link).
 
-Similarly to what we've shown in [Scope and class declarations](#scope-and-class-declarations), the following snippet illustrates the basics of Ruby modules and also how `self` is changed in `module` declarations:
+Similarly to what we've shown in [Scope Gates](#scope-gates), the following snippet illustrates the basics of Ruby modules and also how `self` is changed in `module` declarations:
 
 ```rb
 module Module1
@@ -184,11 +246,16 @@ a.method1
 
 TODO: how to declare instance variables or class method from module ? 
 
-## messages
+
+
+
+## message & method
 
 This section focus on Ruby ways of writing code that sends messages to an object. Later, in TODO, the method declaration that handles the message is detailed. 
 
 Like in other programming languages, the concept of sending a message to an object (or in other words invoking an object's method), is done using the dot operator `.`, like in `tv.change_channel('espn')`. 
+
+### simple example
 
 User optionally passes a list of arguments and given object method is invoked using the *target object* as `self` in the method's body code. The expression evaluates in whatever the method returns: 
 
@@ -232,13 +299,17 @@ class Foo
   end
 end
 ```
+
 ### message block
 
-What's unusual in ruby is that besides the list of arguments, Ruby methods also accepts a code block that they can `yield` whatever times they need. Let's implement JavaScript `Array.prototype.some` which executes given block on each item until the block returns truthy:
+What's unusual in ruby is that besides the list of arguments, Ruby methods also accepts a code block that they can `yield` whatever times they need. For example, in the expression `[1, 2, 3].each() { |item| p item}` we are invoking the method `each` with no arguments and passing a message block right after the call expression. `Array.each` will execute this block passing each of the array's items as argument. 
+
+Let's implement JavaScript `Array.prototype.some` which executes given block on each item until the block returns truthy:
 
 ```rb
 class Array
   def some
+    throw 'No block passed' unless block_given?
     i = 0
     while i < length
       result = yield self[i]
@@ -256,16 +327,19 @@ end
 
 As you can see in the last statement, `some()` is invoked without passing any arguments and next to the call, there's a block expression `do |n| ...`. This is what we call the message block, which is invoked in `some`'s body, using the `yield` expression `result = yield self[i]`. `result` will contain whatever value was returned by given  block.
 
-To know if a message block was passed we use  TODO
+Also notice how we use `block_given?` to know if a message block was passed.
 
-As a last example, here is a method that accepts both, a callback argument and a message block.
+As a last example, here is a method that accepts both, a callback argument and a message block. In this case, instead of using `yield` and the implicit block, we use an alternative syntax by declaring a last argument starting with `&` in which case it will be the passed block object, if any. Notice how, instead of using `yield` we use `block.call`:
 
 ```rb
-def wait_for(predicate)
-  timer = set_interval 0.3 do 
+def set_interval
+  # artificial event loop listener
+end
+def wait_for(predicate, &block)
+  timer = set_interval do 
     if predicate
       clear_interval timer
-      yield
+      block.call
     end
   end
 end
@@ -331,11 +405,23 @@ TODO: getter
 A block is a special kind of object that contains executable code. In fact, all Ruby code is evaluated in the context of a block. Many other blocks can be declared and since they are just objects they can be used like any object. Particularly, as seen in [message block](#message-block), they can be passed in the payload of a message.
 
 TODO: 
-
+ * Closures procs evaluate with a new scope, this is, the scope when the proc is defined. if we pass a block to an instance method, the proc will evaluate with its original scope and not with the instance scope.
+   * 
  * proc vs lambda vs etc and which allows to change scope.
 
 # TODO
 
+```
 ### the instance scope
 ### the class scope
 ### the singleton scope
+
+
+TODO: model object - 
+
+ * obj.class, Class.superclass
+ * classes are objects and unlike other OOP languages, class objects can be manipulated. 
+ * methods are inside the class, variables are inside objects. 
+
+TODO: modules class.superclass==Module - classes are modules with three additional instance method (new, allocate and superclass) that allows the creation of objects or arrange classes into hierarchies
+```
