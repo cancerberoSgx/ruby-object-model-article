@@ -9,9 +9,12 @@
     + [Objects and classes](#objects-and-classes)
     + [Instance variables](#instance-variables)
     + [Methods](#methods)
-  * [Scope and the current object](#scope-and-the-context-object)
+    + [Reflection helpers](#reflection-helpers)
+    + [Classes](#classes)
+  * [Scope and the current object](#scope-and-the-current-object)
     + [self: the default object](#self-the-default-object)
     + [Scope Gates `class`, `module` and `def`](#scope-gates-class-module-and-def)
+    + [Flat Scope](#flat-scope)
   * [declarations](#declarations)
     + [Open class](#open-class)
     + [class declaration](#class-declaration)
@@ -28,9 +31,6 @@
   * [Operators](#operators)
   * [Blocks](#blocks)
 - [TODO](#todo)
-    + [the instance scope](#the-instance-scope)
-    + [the class scope](#the-class-scope)
-    + [the singleton scope](#the-singleton-scope)
 
 <!-- tocstop -->
 
@@ -42,8 +42,8 @@ When we talk about *object model* we are referring basically to these aspects:
 
  * how to create an object
  * how to send a message to an object
- * how to declare object methods and properties
- * how to declare object classes, instance methods, properties, etc
+ * how to declare object methods and properties 
+ * how to declare object classes, instance methods, instance variables, etc
  * how to declare class inheritance and access the class hierarchy (call super)
 
 This document tries to give a detailed description of how these things works and can be written in Ruby. Particular emphasis is made on Ruby peculiarities compared to other programming languages such as scope, class expressions, . So, more than an Object Oriented Programming manual for Ruby, this document should be considered as descriptions on how objects work, understanding class declarations and Ruby peculiarities when dealing with objects and classes.
@@ -77,7 +77,9 @@ The class defines two methods: `initialize` and `eat`. The method `initialize` i
 
 ### Objects and classes
 
-In Ruby everything is an object, and every object is associated with a class of which we say it's an *instance* of. An object's class can be accessed through the method `class`. Even classes themselves are instances of a class named `Class`. Notice in the previous code that the expression `Orc.new` is actually calling `Class`'s method `new`. The following code tries to describe this:
+**In Ruby everything is an object**, and **every object is associated with a class** of which we say it's an *instance* of. An object's class can be accessed through the method `class`. 
+
+And since everything is an object, classes themselves are instances of a class named `Class`. The following code tries to describe this:
 
 ```rb
 fred = Orc.new
@@ -85,9 +87,13 @@ fred.class # => Orc
 Orc.class  # => Class
 ```
 
+Note that in the previous code, the expression `Orc.new` is calling a method on the object `Orc` which is an instance of Class. That method `new` is therefore an instance method of `Class`, that's how the object `Orc` is able to understand the `:new` message. 
+
+This will be described with more detail later, right now, the important thing to understand it that everything is an object which are always associated with a class. And that classes also are objects, instances of `Class`.
+
 ### Instance variables
 
-Unlike in Java or other static languages, in Ruby there is no connection between an object's class and its instance variables. Instance variables just spring into existence when you assign them a value. For example, in the previous example, the instance variable `@energy` is assigned only when the method `eat` is called. If it's not then the instance variable is never defined. In conclusion we could have Orcs with and without `@energy` instance variable. 
+Unlike in Java or other static languages, in Ruby there is no connection between an object's class and its instance variables. Instance variables just spring into existence when you assign them a value. In the previous example, the instance variable `@energy` is assigned only when the method `eat` is called. If it's not then the instance variable is never defined. In conclusion we could have Orcs with and without `@energy` instance variable. 
 
 You can think of the names and values of instance variables as keys and values in a hash. Both the keys and the values can be different for each object.
 
@@ -95,11 +101,40 @@ You can think of the names and values of instance variables as keys and values i
 
 Besides instance variables objects also have methods. But unlike instance variables, objects that share the same class also share the same methods, so methods are stored in the object's class and not in the object itself as instance variables.
 
-The following image tries to illustrate the relationship between objects, classes, instance variables and methods. 
+The following image tries to illustrate the relationship between objects, classes, instance variables and methods using the previous "orcs" example code. 
 
 ![Figure 1-1](diagrams/instance_variables_methods_classes_objects.png)
 
+So, when we say "the method `eat` of object `fred`" we will be actually referring, generally, to the *instance method* `eat` of `fred`'s class, in our case `Orc`. 
 
+Strictly speaking, when talking about classes and methods, it would be incorrect to say "the method `eat` of `Orc`". `Orc`, viewed as an object, won't understand the message `Orc.eat`. Instead we should say "the *instance method* `eat` of `Orc`". It would be correct to also say "the method `new` of `Orc`" though, since `Orc.new` makes sense.
+
+### Reflection helpers
+
+Now that you know about instance methods, this little section explains how to use two utility methods supported in ruby to inspect our object and classes methods. 
+
+In Ruby any object supports the message `:methods` which will return the array of method names that the receiver object understand. Also, `Class` instances supports the message `:instance_methods` which will return the array of instance method names (passing false will ignore inherited instance methods). The following example try to describe these meta-programming helpers:
+
+```
+
+```
+
+
+
+### Classes
+
+As said in the previous section, methods of an object are actually instance methods of its class. So in our example, `fred` methods like `eat` are actually *instance methods* of `Orc`. The interesting part is that the same applies to `Orc` viewed as an object. Methods of `Orc`, like `Orc.new`, are *instance methods* of `Class`:
+
+```rb
+fred = Orc.new
+fred.eat
+p fred.class # Orc
+p Orc.instance_methods(false) # [:eat]
+p Orc.class  # Class
+p Class.instance_methods(false) # [:allocate, :superclass, :new]
+```
+
+So, if classes are also objects, instances of `Class`, could we just use `Class.new` to define a new class? Of course: See [Flat Scope](#flat-scope) section which contains a snippet that defines a our `Orc` using `Class.new`.
 
 ## Scope and the current object
 
@@ -171,7 +206,25 @@ Notice how:
  * Inside a method declaration, `self` references *the instance*, similar to the `this` keyword in other programming languages. 
  * Inside a class declaration and outside a method, `self` references *the class*.
 
-###
+### Flat Scope
+
+Using Scope Gates like `class` has many advantages since the inner code runs with a fresh scope. But sometimes we need to access outer local variables from inside a class which is not possible if using scope gates as shown in the previous section. 
+
+To workaround this problem, classes can be defined using `Class.new` instead the `class` scope gate. 
+
+Also, for outside local variables to be available inside methods, we need to use `Module#define_method` which allows to define new methods imperatively, without using the scope gate `def`:
+
+```rb
+initial_energy = 100
+Orc = Class.new do
+  define_method :eat do
+    @energy = initial_energy
+  end
+end
+```
+
+TODO: more about Class.new and define_method : links or show the signatures
+
 
 ## declarations
 
@@ -179,7 +232,7 @@ We've already seen in [Scope Gates](#scope-gates), how to change the scope using
 
 ### Open class
 
-The `class` keyword being a scope operator (that opens the class scope so we can define methods in it) has a practical consequence: we can *reopen existing classes* - even standard library's - and modify them on the fly. This technique is often known as *Open Class* or *Monkeypatch*.
+`class` being a scope gate instead of a declaration, has a practical consequence: we can *reopen existing classes* - even standard library's like String or Array - and modify them on the fly. This technique is often known as *Open Class* or more despectively as *Monkeypatch*.
 
 This allows to partition a class declaration in several files:
 
@@ -209,15 +262,25 @@ end
 p '  asd ss '.trim
 ```
 
-### class declaration
+### class declarations
 
-TODO: expand previous example with inheritance, super, class instance, class method
+TODO: expand previous example with inheritance, super, class variables, class method
 
-### module declaration
 
-The keyword `module` can be used to change the scope to a `class` with the only difference that instead of common class inheritance where the parent class is declared, a `module` is `include`d explicitly by any class. Since a class can `include` several modules, this provides with an alternative to class inheritance when multiple inheritance is needed. This somewhat remembers JavaScript object mixin. 
+### Modules
 
-Think of modules as a syntax to declare the "composition" part in "composition vs inheritance" discussions (TODO link).
+TODO: Class is a Module  Class < Module < BaseObject. TODO: snippet
+
+So classes are modules with some utilities like `Class#new`. So everything said here about modules also applies to classes.
+
+modules can be explicitly `include`d in other classes to augment their instance methods, and instance variables.
+
+
+<!-- module declaration -->
+
+<!-- The keyword `module` can be used to change the scope to a `class` with the only difference that instead of common class inheritance where the parent class is declared, a `module` is `include`d explicitly by any class. Since a class can `include` several modules, this provides with an alternative to class inheritance when multiple inheritance is needed. This somewhat remembers JavaScript object mixin. 
+
+Think of modules as a syntax to declare the "composition" part in "composition vs inheritance" discussions (TODO link). -->
 
 Similarly to what we've shown in [Scope Gates](#scope-gates), the following snippet illustrates the basics of Ruby modules and also how `self` is changed in `module` declarations:
 
@@ -302,7 +365,7 @@ end
 
 ### message block
 
-What's unusual in ruby is that besides the list of arguments, Ruby methods also accepts a code block that they can `yield` whatever times they need. For example, in the expression `[1, 2, 3].each() { |item| p item}` we are invoking the method `each` with no arguments and passing a message block right after the call expression. `Array.each` will execute this block passing each of the array's items as argument. 
+What's unusual in Ruby compared to other languages is that besides the list of arguments, methods also accepts a code block that they can `yield` whatever times they need. For example, in the expression `[1, 2, 3].each() { |item| p item}` we are invoking the method `each` with no arguments and passing a message block right after the call expression. `Array.each` will execute this block passing each of the array's items as argument. 
 
 Let's implement JavaScript `Array.prototype.some` which executes given block on each item until the block returns truthy:
 

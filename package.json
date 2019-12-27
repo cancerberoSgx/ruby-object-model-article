@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "html": "npx marked -i ruby-object-model.md -o output/ruby-object-model.html",
+    "html": "npx marked -i ruby-object-model.md -o output/ruby-object-model.html && cp -r diagrams output",
     "pdf": "npx md-to-pdf ruby-object-model.md output/ruby-object-model.pdf",
     "toc": "npx markdown-toc ruby-object-model.md -i",
     "all": "rm -rf output && mkdir -p output && npm run toc && npm run html && npm run pdf"
