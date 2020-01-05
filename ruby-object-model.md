@@ -1,6 +1,8 @@
+<!-- Auto generated with 'npm run concat' -->
+
 # The Ruby Object Model
 
-Author: Sebastián Gurin - [WyeWorks](wyeworks.com)   
+Sebastián Gurin - [WyeWorks](wyeworks.com)   
 
 ## Contents
 
@@ -66,7 +68,7 @@ This document tries to give a detailed description of how these things works and
 
  <!-- Particular emphasis is made on Ruby peculiarities compared to other programming languages such as scope, class expressions, .  -->
 
-So, more than an Object Oriented Programming manual for Ruby, this document should be considered as descriptions on how objects work, understanding class declarations and Ruby peculiarities when dealing with objects and classes.
+So, more than an Object Oriented Programming manual for Ruby, this document should be considered as descriptions on how objects work, understanding class declarations and Ruby peculiarities when dealing with objects, clkasses and methods.
 
 It assumes the reader has some background on object oriented programming such as the concepts of object, class, message, method and inheritance. Basic Ruby background is recommended although not needed since the code snippets are simple and commented.
 

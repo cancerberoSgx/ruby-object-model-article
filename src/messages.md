@@ -72,7 +72,7 @@ MySubclass.ancestors # => [MySubclass, MyClass, Object, Kernel, BasicObject]
 
 Notice that `Kernel`, which is a module, not a class, is also included in the ancestors of `MySubclass`, just like any class.
 
-### message block
+### Message block
 
 What's unusual in Ruby compared to other languages is that besides the list of arguments, methods also accepts a code block that they can `yield` whatever times they need. For example, in the expression `[1, 2, 3].each() { |item| p item}` we are invoking the method `each` with no arguments and passing a message block right after the call expression. `Array.each` will execute this block passing each of the array's items as argument. 
 
