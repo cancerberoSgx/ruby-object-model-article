@@ -4,47 +4,50 @@
 
 <!-- toc -->
 
-  * [About this document](#about-this-document)
-  * [The basics](#the-basics)
-    + [Objects and classes](#objects-and-classes)
-    + [Instance variables](#instance-variables)
-    + [Methods](#methods)
-    + [Object, class, method, instance variable relationship](#object-class-method-instance-variable-relationship)
-    + [inheritance](#inheritance)
-    + [method override with `super`](#method-override-with-super)
-    + [class methods and class variables](#class-methods-and-class-variables)
-    + [accessors](#accessors)
-    + [The Ruby class hierarchy](#the-ruby-class-hierarchy)
-    + [superclass](#superclass)
+- [About this document](#about-this-document)
+- [The basics](#the-basics)
+  * [Objects and classes](#objects-and-classes)
+  * [Instance variables](#instance-variables)
+  * [Methods](#methods)
+  * [Object, class, method, instance variable relationship](#object-class-method-instance-variable-relationship)
+  * [inheritance](#inheritance)
+  * [method override with `super`](#method-override-with-super)
+  * [class methods and class variables](#class-methods-and-class-variables)
+  * [The Ruby class hierarchy](#the-ruby-class-hierarchy)
+  * [superclass](#superclass)
   * [Constants](#constants)
-  * [Scope and the current object](#scope-and-the-current-object)
-    + [self: the current object](#self-the-current-object)
-    + [Scope Gates `class`, `module` and `def`](#scope-gates-class-module-and-def)
-    + [Flat Scope](#flat-scope)
-  * [declarations](#declarations)
-    + [Open class](#open-class)
-    + [Modules](#modules)
-    + [Refinements](#refinements)
-  * [Messages & methods](#messages--methods)
-    + [simple example](#simple-example)
-    + [message syntax](#message-syntax)
-    + [method syntax](#method-syntax)
-    + [Method lookup](#method-lookup)
-    + [message block](#message-block)
-      - [yield_self, a.k.a then](#yield_self-aka-then)
-  * [More on class members and messages](#more-on-class-members-and-messages)
-    + [Method visibility and private](#method-visibility-and-private)
-    + [accessors](#accessors-1)
-    + [accessor methods](#accessor-methods)
-    + [Operators](#operators)
-  * [Blocks](#blocks)
-- [TODO](#todo)
+- [Scope](#scope)
+  * [self: the current object](#self-the-current-object)
+  * [Scope Gates `class`, `module` and `def`](#scope-gates-class-module-and-def)
+  * [Flat Scope](#flat-scope)
+- [Declarations](#declarations)
+  * [Open class](#open-class)
+  * [Modules](#modules)
+  * [Refinements](#refinements)
+- [Messages & methods](#messages--methods)
+  * [Simple example](#simple-example)
+  * [Message syntax](#message-syntax)
+  * [Method syntax](#method-syntax)
+  * [Method lookup](#method-lookup)
+  * [message block](#message-block)
+    + [yield_self, a.k.a then](#yield_self-aka-then)
+- [More on class members and messages](#more-on-class-members-and-messages)
+  * [Method visibility and private](#method-visibility-and-private)
+  * [accessors](#accessors)
+  * [class macros](#class-macros)
+  * [accessor methods](#accessor-methods)
+  * [Operator overloading](#operator-overloading)
+- [The singleton scope](#the-singleton-scope)
+  * [Singleton methods](#singleton-methods)
+  * [Singleton classes](#singleton-classes)
+    + [`class << obj` - the singleton class scope gate](#class--obj---the-singleton-class-scope-gate)
+  * [Method lookup revisited](#method-lookup-revisited)
 
 <!-- tocstop -->
 
 ## About this document
 
-When it comes to modeling a problem using an object oriented fashion, each language has its own peculiarities when it comes to, declaring objects and classes, code scope, object instantiation, etc. 
+When it comes to modeling a problem using an object oriented fashion, each language has its own peculiarities when it comes to, declaring objects and classes, code scope, object instantiation, inheritance, method lookup, etc. 
 
 When we talk about *object model* we are referring basically to these aspects:
 
@@ -53,13 +56,14 @@ When we talk about *object model* we are referring basically to these aspects:
  * how to declare object methods and properties 
  * how to declare object classes, instance methods, instance variables, etc
  * how to declare class inheritance and access the class hierarchy (call super)
- * understand object properties and class members are stored internally and how messages are dispatched 
+ * understand object properties and class members are stored internally
+ * how messages are dispatched how method lookup works
 
 This document tries to give a detailed description of how these things works and can be written in Ruby.
 
  <!-- Particular emphasis is made on Ruby peculiarities compared to other programming languages such as scope, class expressions, .  -->
 
- So, more than an Object Oriented Programming manual for Ruby, this document should be considered as descriptions on how objects work, understanding class declarations and Ruby peculiarities when dealing with objects and classes.
+So, more than an Object Oriented Programming manual for Ruby, this document should be considered as descriptions on how objects work, understanding class declarations and Ruby peculiarities when dealing with objects and classes.
 
 It assumes the reader has some background on object oriented programming such as the concepts of object, class, message, method and inheritance. Basic Ruby background is recommended although not needed since the code snippets are simple and commented.
 
@@ -79,8 +83,6 @@ class Orc
 end
 fred = Orc.new
 ```
-
-
 
 <!-- As you can see, we used `class` to declare a new class. 
 The class defines two methods: `initialize` and `eat`. The method `initialize` is analogous to Java or JavaScript `constructor` in the sense that will be called when new instances are created. On it we define an *instance variable* called `@energy` by just assigning it a value. -->
@@ -191,7 +193,7 @@ end
 
 ### class methods and class variables
 
-The following example shows how to declare class level variables using `@@` and declare class level methods using `def self.`. The interesting part
+The following example shows how to declare class level variables using `@@` and declare class level methods using `def self.`. 
 
 ```rb
 class Node
@@ -208,13 +210,9 @@ Node.load_from_file('widget1.json').render
 ```
 
 
-### accessors
-
-TODO: attr, attr_reader, attr_writer, etc
-
 ### The Ruby class hierarchy
 
-TODO: diagram of ruby class hierarch (baseObject, object, Class, Module, Kernel)
+<!-- TODO: diagram of ruby class hierarch (baseObject, object, Class, Module, Kernel) -->
 
 The following diagram shows main classes of standard Ruby class hierarchy and a example method implemented by each.
 
@@ -228,7 +226,7 @@ Some interesting considerations:
 
 ### superclass
 
-Similarly than any `Object` instance knows its `class`, also any `Class` instance knows its `superclass`. When defining a new class, if non superclass is specified, new classes extend `Object`.
+Similarly than any `Object` instance knows its `class`, also any `Class` instance knows its `superclass`. When defining a new class, if no superclass is specified, new classes extend `Object`.
 
 Let's consider a small example code and represent the `class` and `superclass` relationships between instances and the standard Ruby classes in a diagram: 
 
@@ -236,8 +234,9 @@ Let's consider a small example code and represent the `class` and `superclass` r
 class MyClass
 end
 obj1 = MyClass.new
-p MyClass.superclass # => Object
+p obj1.class # => MyClass
 p MyClass.class.superclass # => Module
+p MyClass.class.superclass.superclass # => Object
 ```
 
 ![Figure superclass](diagrams/ruby-class-hierarchy-superclass.png)
@@ -247,20 +246,27 @@ p MyClass.class.superclass # => Module
 
 TODO: pg 21
 
+TODO: filesystem-like analogy vs variables (in other languages constants are just like variables but will throw if re-assigned)
+TODO: class names are constants
 
 
 
-## Scope and the current object
+
+
+
+## Scope
 
 Although the concept of *scope* might seem not directly related with objects and classes, it plays a critical role while dealing with them in Ruby. 
 
-Similar to other scripting languages understanding the rules for the scope on which the code we write runs is critical. And also like other languages, there's a particular object in the scope that represents *"the thing we are talking about now"*, more formally often called the *current object*. 
+Similar to other scripting languages like JavaScript, understanding the rules for the scope on which the code runs is basic to write object oriented code in Ruby. 
 
-Most languages represent this object with a keyword, in Ruby the keyword `self` is used, while in other programming languages the `this` keyword is often used.
-
-Depending on which part of the code you are, `self` represents different things. It's always present and, in Ruby, it cannot be re-assigned. 
+What do we exactly refer to when we say "scope" ? At *any* part of Ruby code, we say that at that moment, the **scope is all the names we can reference** from there, like local variables, instance and class variables, methods, constants, classes, modules, etc.
 
 ### self: the current object
+
+There's a particular object in the scope that represents "*the thing we are talking about now*", in Ruby more formally often called the **current object**. Most languages represent this object with a keyword, in Ruby the keyword `self` is used, while in other programming languages the `this` keyword is often used.
+
+Depending on which part of the code you are, `self` represents different things. It's always present and, in Ruby, it cannot be re-assigned. 
 
 The primordial operation objects must support is to receive messages. The *current object*, this is `self`, acts as the default object when the message receiver is not specified. For example, the following two statements are equivalent:
 
@@ -378,20 +384,23 @@ p '  asd ss '.trim
 
 ### Modules
 
-TODO: Class is a Module  Class < Module < BaseObject. TODO: snippet
+<!-- TODO: Class is a Module  Class < Module < BaseObject. TODO: snippet -->
 
-So classes are modules with some utilities like `Class#new`. So everything said here about modules also applies to classes.
 
-modules can be explicitly `include`d in other classes to augment their instance methods, and instance variables.
+<!-- modules can be explicitly `include`d in other classes to augment their instance methods, and instance variables. On this regard, one can think of modules as an alternative to inheritance that supports multiple inheritance or in other words, as a syntax to declare the "composition" part in "composition vs inheritance" discussions (TODO link).  -->
 
 
 <!-- module declaration -->
 
 <!-- The keyword `module` can be used to change the scope to a `class` with the only difference that instead of common class inheritance where the parent class is declared, a `module` is `include`d explicitly by any class. Since a class can `include` several modules, this provides with an alternative to class inheritance when multiple inheritance is needed. This somewhat remembers JavaScript object mixin. 
+ -->
 
-Think of modules as a syntax to declare the "composition" part in "composition vs inheritance" discussions (TODO link). -->
+Formally, the keyword `module`, similarly as `class` is a scope gate that can be used to declare instance methods and variables that can be `include`d by classes or other modules. 
 
-Similarly to what we've shown in [Scope Gates](#scope-gates), the following snippet illustrates the basics of Ruby modules and also how `self` is changed in `module` declarations:
+An important fact to understand, as shown [before](#the-ruby-class-hierarchy) is that **`class` is a `module`, or in other words, `Class` extends `Module`**.
+<!-- by the following is that **classes are modules** -->
+
+Similarly to what we've shown in [Scope Gates](#scope-gates), the following snippet illustrates the basics of Ruby modules and how `self` changes in `module` declarations:
 
 ```rb
 module Module1
@@ -416,7 +425,7 @@ a = A.new
 a.method1
 ```
 
-TODO: how to declare instance variables or class method from module ? 
+<!-- TODO: how to declare instance variables or class method from module ?  -->
 
 ### Refinements
 
@@ -439,19 +448,15 @@ end
 p 'hello'.reverse    # "olleh"
 ```
 
-## Singleton methods and singleton classes
-
-If you came from other scripting languages, such as JavaScript, then you know it's possible to define new methods to single objects without 
-
 
 
 ## Messages & methods
 
-This section focus on Ruby ways of writing code that sends messages to an object. Later, in TODO, the method declaration that handles the message is detailed. 
+<!-- This section focus on Ruby ways of writing code that sends messages to an object. Later, in [Method Syntax](#method-syntax), the method declaration that handles the message is detailed.  -->
 
 Like in other programming languages, the concept of sending a message to an object (or in other words invoking an object's method), is done using the dot operator `.`, like in `tv.change_channel('bbc')`. 
 
-### simple example
+### Simple example
 
 User optionally passes a list of arguments and given object method is invoked using the *target object* as `self` in the method's body code. The expression evaluates in whatever the method returns: 
 
@@ -466,7 +471,7 @@ car = Car.new
 degrees = car.turn(:left)
 ```
 
-### message syntax
+### Message syntax
 
 What's interesting of Ruby is that it support more than one flavor to write message expressions: 
 
@@ -482,7 +487,7 @@ result = my_object.players(serie_id: :serie1, filters: [a, b], round: 1)
 result = my_object.players serie_id: :serie1, filters: [a, b], round: 1
 ```
 
-### method syntax
+### Method syntax
 
 Now how is it implemented each of the message syntax above ?
 
@@ -590,7 +595,7 @@ Note: Ruby objects also support `tap` method but unlike `yield_self`, it yields 
 
 ### Method visibility and private
 
-Ruby language supports declaring methods as `public`, `protected` or `private`. In general they have the same purpose as in other languages such as Java or C#. Private methods are governed by a single simple rule: **private methods cannot be called with an explicit receiver**. Go back to section [Self: the default object](self-the-default-object) where we described messages with explicit receiver (`foo.bar()`) versus messages with implicit `self` receiver (`bar()`). In other words very time you call a private method, it must be on the implicit receiver: `self`.
+Ruby language supports declaring methods as `public`, `protected` or `private`. In general they have the same purpose as in other languages such as Java or C# but in Ruby, `private` in particular has a peculiar semantics that can be summarized with a single simple rule: **private methods cannot be called with an explicit receiver**. Go back to section [Self: the default object](self-the-default-object) where we described messages with explicit receiver like `foo.bar()` versus messages with implicit `self` receiver like `bar()`. Then every time you call a private method, it must be on the implicit receiver: `self`. If an expression with an explicit receiver is used then it throws an error. 
 
 The following is a controversial example which shows that a private method cannot be called, even from its own class if the message receiver is given explicitly:
 
@@ -607,7 +612,6 @@ Foo.new.public_method
 
 Running the snippet will throw `NoMethodError: private method 'private_method' called [...]`. To solve the problem we just need to replace `self.private_method` with `private_method` - in other words, call the private method with the implicit `self` receiver. 
 
-However, there's is a peculiarity regarding what Ruby understand for `private`. 
 
 ### accessors
 
@@ -619,48 +623,196 @@ attr_writable :bar
 etc
 ```
 
-### accessor methods
+### class macros
 
-TODO
+The ability to run any code inside a class definition, plus its friendly syntax allow Ruby programmers to conceptualize what we call **class macros**. Formally, they are statements inside the class scope calling class methods to perform operations on the class itself, often using Ruby's metaprogramming API to modify the class behavior. 
 
-```
-def foo=(value)
-  @foo = value
+When we described [accessors](#accessors), we where actually talking about `Module`'s class methods that are called in statements inside the class definition. The expression `attr :foo` for example is actually calling `Module.attr()` method. 
+
+For Ruby newcomers, expressions like `attr :foo` in the middle of class definitions could look like a syntax thing, but actually there's no special syntax at all, we are just calling a class method that will modify the class to support `attr` semantics.
+
+Let's write our own class macro `second`, that, given a method named `name` it will create a second method named `"#{name}2"` that calls the original method and log the call:
+
+```rb
+class Base
+  def self.second(*methods)
+    methods.each{|method|
+    define_method("#{method}2") do |*args, &block| 
+      print "'#{method}' called"
+      send method, *args, &block
+    end
+  }
+  end
 end
-TODO: getter
+class Elf < Base
+  second :foo
+  def foo; end
+end
+elf = Elf.new
+elf.foo
+elf.foo2 # => 'method' called
 ```
 
-### Operators
+<!-- Ruby's `Module` class, for example, comes with a variety of class-level utilities to control how user access object's attributes as described . The expression `attr :foo` for example -->
 
-TODO
+
+### accessor methods 
+
+Ruby supports method definition to handle attribute getter and assignation. 
+
+```rb
+class Bar
+  def foo=(value)
+    @foo = value
+  end
+  def foo
+    @foo
+  end
+end
+bar = Bar.new
+bar.foo = 2
+p bar.foo
+```
+
+### Operator overloading
+
+Ruby permits operator overloading, allowing one to define how an operator shall be used in a particular program. For example a `+` operator can be define in such a way to perform subtraction instead addition and vice versa. The operators that can be overloaded are `+`, `-`, `/`, `*`, `**`, `%`, etc and some operators that can not be overloaded are `&`, `&&`, `|`, `||`, `()`, `{}`, `~`, etc.
+
+Operator functions are same as normal functions. The only differences are, name of an operator function is always symbol of operator followed operator object. Operator functions are called when the corresponding operator is used. Operator overloading is not commutative that means that `3 + a` is not same as `a + 3`.
+
+In the following example we write the backbones of a class for complex numbers and implement the `+` operator.
+
+```rb
+class ComplexNumber
+  attr_reader :real, :imaginary
+  def initialize(real = 0, imaginary = 0)
+    @real = real
+    @imaginary = imaginary
+  end
+  def +(other)
+    ComplexNumber.new @real + other.real, @imaginary + other.imaginary
+  end
+  def to_s
+    "ComplexNumber(#{@real}, #{@imaginary})"
+  end
+end
+a = ComplexNumber.new(1, 1)
+b = ComplexNumber.new(2, 2)
+print a + b # => ComplexNumber(3, 3)
+```
+
+<!-- TODO
  * relationship between operators and methods 
  * operators are methods
- * can be overridde - even Number ? 
+ * can be overridde - even Number ?  -->
 
 
 
-## Blocks
 
-A block is a special kind of object that contains executable code. In fact, all Ruby code is evaluated in the context of a block. Many other blocks can be declared and since they are just objects they can be used like any object. Particularly, as seen in [message block](#message-block), they can be passed in the payload of a message.
+## The singleton scope
 
-TODO: 
- * Closures procs evaluate with a new scope, this is, the scope when the proc is defined. if we pass a block to an instance method, the proc will evaluate with its original scope and not with the instance scope.
-   * 
- * proc vs lambda vs etc and which allows to change scope.
+Remember how we [said before](#methods) that an object's methods are actually part of the object's class and not the object itself? The implication is that objects of the same class share their methods. 
 
-# TODO
+Sometimes though, is useful to support custom object's behavior independently of a particular class, this is, given an object patch the object itself with custom behavior, without impacting the object's class. 
 
+This makes 
+
+Although this is often not supported by static languages like Java or C++, other scripting languages like JavaScript supports this very strightforward:
+
+<!-- belong to an object class not to the object itself, then all instances of a class are not part of instances but part of the instance's class. -->
+
+<!-- This section describe how Ruby's solves this problemsingleton methods and singleton classes a Ruby way of defining per-object custom behavior. -->
+
+
+<!-- Until now, objects of the same class have the same methods since methods are defined at the class level.  -->
+<!-- If you came from other scripting languages, such as JavaScript, then you know it's possible to define new methods to a single object without affecting its class as simply as: -->
+
+```js
+var obj = new MyClass
+obj.method1 = function() { 
+  return 'hello' 
+}
 ```
-### the instance scope
-### the class scope
-### the singleton scope
 
+Can we accomplish this in Ruby? The answer to this question will give us the chance to learn Ruby language core features: *singleton methods* and *singleton classes*.
 
-TODO: model object - 
+### Singleton methods
 
- * obj.class, Class.superclass
- * classes are objects and unlike other OOP languages, class objects can be manipulated. 
- * methods are inside the class, variables are inside objects. 
+The Ruby code equivalent to previous JavaScript snippet could be something like:
 
-TODO: modules class.superclass==Module - classes are modules with three additional instance method (new, allocate and superclass) that allows the creation of objects or arrange classes into hierarchies
+```rb
+obj = MyClass.new
+def obj.method1
+  'hello'
+end
 ```
+
+As you can see we've defined a new method `method1` but just for the instance `obj`. The rest of `MyClass` instances won't have it.
+
+Notice how we use the scope gate `def` to define method `obj.method1` without using the `class` operator. 
+<!-- We already made something similar when we used `def self.my_method` to define class methods, but this time we use `obj` instead of `self` - both `self` and `obj` are objects and we can use the same synyax without scope gate `class` to define  -->
+
+The same as before but using `define_singleton_method` so we don't need to use `class` scope gate:
+
+```rb
+obj = MyClass.new
+obj.define_singleton_method(:method1) { 'hello' }
+```
+
+An interesting fact is that, **class methods are actually singleton methods of the class**. For example in `MyClass.my_class_method()`, `my_class_method` is actually a singleton method of `MyClass`.
+
+### Singleton classes
+
+So, where do these *singleton methods* live ? As we [said](#methods), methods are not part of instances but part of the instance's class. On the other side, singleton methods couldn't be part of the object class since if so, all instances of the class would support them. So, where are singleton methods stored in the Ruby Object Model ? 
+
+In Ruby, objects are associated not only with a class but also with what we call *the object's singleton class*
+
+<!-- When you ask an object for its class, Ruby, doesn't always tell you the whole truth. Instead of the class that you see, an object can have its own special hidden class. That's called the *singleton class* of the object. (Also called the *metaclass* or the *eigenclass*). -->
+So while we use `obj.class` to access an object "normal" class, we use `obj.singleton_class` to access an object singleton class. 
+
+#### `class << obj` - the singleton class scope gate
+
+Ruby also supports another syntax besides `singleton_class` to access an object's singleton class which is based on the `class` keyword:
+
+<!-- (BTW, before Ruby TODO.TODO this was the only way to access an object singleton class):  -->
+
+```rb
+obj = MyClass.new
+class << obj
+  def method1
+    'hello'
+  end
+end
+```
+
+Remember how we said `class` is a scope gate ? Well in this case the expression `class << obj` opens the scope to `obj`'s singleton class the same way `class C` opens the scope to a "normal" `C` class. Methods and instance variables defined inside will belong to `obj`'s singleton class. 
+
+<!-- TODO: singleton class notation (obj - MyClass, #obj) - #obj represents the singleton class of object `obj` -->
+
+TODO: `obj.singleton_class` extends `obj.class`
+
+TODO: golden object model rules - pg 125
+
+
+### Method lookup and singleton classes
+
+Previously, in [Method lookup](#method-lookup), we explained how the Ruby interpreter finds a method. Well, that was without considering singleton classes. Now that we know they exists, the missing part is the role of singleton methods in this scenario. 
+
+Heads up: We represent the singleton class of an object `obj` with `#obj`.
+
+```rb
+class MyClass
+  def method1; end
+end
+obj = MyClass.new
+def obj.method2; end
+```
+
+![Method lookup and singleton classes](diagrams/method-lookup-singleton-class.png)
+
+
+### Inheritance and singleton classes
+
+As we said previously we represent the singleton class of an object named `obj` with `#obj`. Also, since classes are also objects, we represent the singleton class of a class named `MyClass` with `#MyClass`. As said before, class methods are methods of the class's singleton class, so class methods of `MyClass` are actually singleton methods of `#MyClass`. 
+
+The following diagram shows the relationship between `class`, `singleton_class` and `superclass`.
