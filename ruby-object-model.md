@@ -1,5 +1,7 @@
 # The Ruby Object Model
 
+Author: Sebastián Gurin - [WyeWorks](wyeworks.com)   
+
 ## Contents
 
 <!-- toc -->
@@ -10,11 +12,11 @@
   * [Instance variables](#instance-variables)
   * [Methods](#methods)
   * [Object, class, method, instance variable relationship](#object-class-method-instance-variable-relationship)
-  * [inheritance](#inheritance)
-  * [method override with `super`](#method-override-with-super)
-  * [class methods and class variables](#class-methods-and-class-variables)
+  * [Inheritance](#inheritance)
+  * [Method override and `super`](#method-override-and-super)
+  * [Class methods and class variables](#class-methods-and-class-variables)
   * [The Ruby class hierarchy](#the-ruby-class-hierarchy)
-  * [superclass](#superclass)
+  * [Superclass](#superclass)
   * [Constants](#constants)
 - [Scope](#scope)
   * [self: the current object](#self-the-current-object)
@@ -33,15 +35,16 @@
     + [yield_self, a.k.a then](#yield_self-aka-then)
 - [More on class members and messages](#more-on-class-members-and-messages)
   * [Method visibility and private](#method-visibility-and-private)
-  * [accessors](#accessors)
-  * [class macros](#class-macros)
-  * [accessor methods](#accessor-methods)
+  * [Accessors](#accessors)
+  * [Class macros](#class-macros)
+  * [Accessor methods](#accessor-methods)
   * [Operator overloading](#operator-overloading)
 - [The singleton scope](#the-singleton-scope)
   * [Singleton methods](#singleton-methods)
   * [Singleton classes](#singleton-classes)
     + [`class << obj` - the singleton class scope gate](#class--obj---the-singleton-class-scope-gate)
-  * [Method lookup revisited](#method-lookup-revisited)
+  * [Method lookup and singleton classes](#method-lookup-and-singleton-classes)
+  * [Inheritance and singleton classes](#inheritance-and-singleton-classes)
 
 <!-- tocstop -->
 
@@ -68,7 +71,6 @@ So, more than an Object Oriented Programming manual for Ruby, this document shou
 It assumes the reader has some background on object oriented programming such as the concepts of object, class, message, method and inheritance. Basic Ruby background is recommended although not needed since the code snippets are simple and commented.
 
 Aside, this is a millennial-friendly document: short paragraphs and code snippets right away!
-
 ## The basics
 
 Let's start by explaining how to define a class and create new object instances in Ruby. In following sections we will be explaining exactly what's happening and how it works in detail, right now the objective is just making sure we know how to do it. 
@@ -154,7 +156,7 @@ p Class.instance_methods(false) # [:allocate, :superclass, :new]
 
 So, if classes are also objects, instances of `Class`, could we just use `Class.new` to define a new class? Of course: See [Flat Scope](#flat-scope) section which contains a snippet that defines a our `Orc` using `Class.new`.
 
-### inheritance
+### Inheritance
 
 In Ruby, the operator `<` is used to extend a class, in other words, to define a subclass. The following snippet which makes our `Orc` extend a base class `Unit`:
 
@@ -172,7 +174,7 @@ end
 fred = Orc.new
 ```
 
-### method override with `super`
+### Method override and `super`
 
 From the previous example, we will override `Unit#die` to customize `Orc`'s behaviors. Notice how we call `super` to execute the original `Unit#die`: 
 
@@ -191,7 +193,7 @@ end
 ```
 
 
-### class methods and class variables
+### Class methods and class variables
 
 The following example shows how to declare class level variables using `@@` and declare class level methods using `def self.`. 
 
@@ -224,7 +226,7 @@ Some interesting considerations:
  * `Class` extends `Module` so all classes are also modules.
 
 
-### superclass
+### Superclass
 
 Similarly than any `Object` instance knows its `class`, also any `Class` instance knows its `superclass`. When defining a new class, if no superclass is specified, new classes extend `Object`.
 
@@ -613,7 +615,7 @@ Foo.new.public_method
 Running the snippet will throw `NoMethodError: private method 'private_method' called [...]`. To solve the problem we just need to replace `self.private_method` with `private_method` - in other words, call the private method with the implicit `self` receiver. 
 
 
-### accessors
+### Accessors
 
 TODO
 
@@ -623,7 +625,7 @@ attr_writable :bar
 etc
 ```
 
-### class macros
+### Class macros
 
 The ability to run any code inside a class definition, plus its friendly syntax allow Ruby programmers to conceptualize what we call **class macros**. Formally, they are statements inside the class scope calling class methods to perform operations on the class itself, often using Ruby's metaprogramming API to modify the class behavior. 
 
@@ -656,7 +658,7 @@ elf.foo2 # => 'method' called
 <!-- Ruby's `Module` class, for example, comes with a variety of class-level utilities to control how user access object's attributes as described . The expression `attr :foo` for example -->
 
 
-### accessor methods 
+### Accessor methods 
 
 Ruby supports method definition to handle attribute getter and assignation. 
 
@@ -717,7 +719,7 @@ Sometimes though, is useful to support custom object's behavior independently of
 
 This makes 
 
-Although this is often not supported by static languages like Java or C++, other scripting languages like JavaScript supports this very strightforward:
+Although this is often not supported by static languages like Java or C++, other scripting languages like JavaScript supports this very straightforward:
 
 <!-- belong to an object class not to the object itself, then all instances of a class are not part of instances but part of the instance's class. -->
 

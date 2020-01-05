@@ -6,7 +6,8 @@
     "html": "npx marked -i ruby-object-model.md -o output/ruby-object-model.html && cp -r diagrams output",
     "pdf": "npx md-to-pdf ruby-object-model.md output/ruby-object-model.pdf",
     "toc": "npx markdown-toc ruby-object-model.md -i",
-    "all": "rm -rf output && mkdir -p output && npm run toc && npm run html && npm run pdf"
+    "concat": "cat src/intro.md > ruby-object-model.md; cat src/basics.md >> ruby-object-model.md; cat src/classes.md >> ruby-object-model.md; cat src/scope.md >> ruby-object-model.md; cat src/declarations.md >> ruby-object-model.md; cat src/messages.md >> ruby-object-model.md; cat src/mode-on-members.md >>  ruby-object-model.md; cat src/singleton.md >> ruby-object-model.md;",  
+    "all": "rm -rf output && mkdir -p output && npm run concat && npm run toc && npm run html && npm run pdf"
   },
   "author": "Sebastián Gurin",
   "license": "ISC",
