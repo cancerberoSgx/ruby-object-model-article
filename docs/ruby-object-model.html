@@ -302,7 +302,8 @@ p MyClass.<span class="hljs-keyword">class</span>.superclass.superclass <span cl
 <p>The primordial operation objects must support is to receive messages. The <em>current object</em>, this is <code>self</code>, acts as the default object when the message receiver is not specified. For example, the following two statements are equivalent:</p>
 <pre><code class="hljs rb">a = <span class="hljs-keyword">self</span>.to_s
 b = to_s</code></pre><p>As you can see in the second line, we send a message <code>to_s</code> without providing the target object, so the message will be actually be dispatched by <code>self</code>, the current object.</p>
-<p><i id="scope-gates-class-module-and-def"></i></p>
+<p><i id="scope-gates-class-module-and-def"></i>
+<i id="scope-gates"></i></p>
 <h3>Scope Gates <code>class</code>, <code>module</code> and <code>def</code></h3>
 <!-- Besides being the current object for messages, `self` plays an important role while declaring classes.  -->
 
@@ -443,8 +444,6 @@ p <span class="hljs-string">'hello'</span>.reverse    <span class="hljs-comment"
 
 <p><i id="messages-&amp;-methods"></i></p>
 <h2>Messages &amp; methods</h2>
-<!-- This section focus on Ruby ways of writing code that sends messages to an object. Later, in [Method Syntax](#method-syntax), the method declaration that handles the message is detailed.  -->
-
 <p>Like in other programming languages, the concept of sending a message to an object (or in other words invoking an object’s method), is done using the dot operator <code>.</code>, like in <code>tv.change_channel('bbc')</code>. </p>
 <h3>Simple example</h3>
 <p>User optionally passes a list of arguments and given object method is invoked using the <em>target object</em> as <code>self</code> in the method’s body code. The expression evaluates in whatever the method returns: </p>
@@ -670,6 +669,7 @@ obj.define_singleton_method(<span class="hljs-symbol">:method1</span>) { <span c
 <span class="hljs-keyword">end</span>
 obj = MyClass.new
 <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">obj</span>.<span class="hljs-title">method2</span>;</span> <span class="hljs-keyword">end</span></code></pre><p><img src="diagrams/method-lookup-singleton-class.png" alt="Method lookup and singleton classes"></p>
+<p><i id="inheritance-and-singleton-classes"></i></p>
 <h3>Inheritance and singleton classes</h3>
 <p>As we said previously we represent the singleton class of an object named <code>obj</code> with <code>#obj</code>. Also, since classes are also objects, we represent the singleton class of a class named <code>MyClass</code> with <code>#MyClass</code>. As said before, class methods are methods of the class’s singleton class, so class methods of <code>MyClass</code> are actually singleton methods of <code>#MyClass</code>. </p>
 <p>The following diagram shows the relationship between <code>class</code>, <code>singleton_class</code> and <code>superclass</code>.</p>

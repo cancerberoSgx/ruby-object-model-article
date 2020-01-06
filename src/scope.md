@@ -11,6 +11,8 @@ Similar to other scripting languages like JavaScript, understanding the rules fo
 What do we exactly refer to when we say "scope" ? At *any* part of Ruby code, we say that at that moment, the **scope is all the names we can reference** from there, like local variables, instance and class variables, methods, constants, classes, modules, etc.
 
 
+
+
 <i id="self-the-current-object"></i>
 
 ### self: the current object
@@ -29,7 +31,10 @@ b = to_s
 As you can see in the second line, we send a message `to_s` without providing the target object, so the message will be actually be dispatched by `self`, the current object.
 
 
+
+
 <i id="scope-gates-class-module-and-def"></i>
+<i id="scope-gates"></i>
 
 ### Scope Gates `class`, `module` and `def`
 
@@ -79,6 +84,8 @@ Notice how:
 
  * Inside a method declaration, `self` references *the instance*, similar to the `this` keyword in other programming languages. 
  * Inside a class declaration and outside a method, `self` references *the class*.
+
+
 
 
 <i id="flat-scope"></i>

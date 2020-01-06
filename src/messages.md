@@ -4,8 +4,6 @@
 
 ## Messages & methods
 
-<!-- This section focus on Ruby ways of writing code that sends messages to an object. Later, in [Method Syntax](#method-syntax), the method declaration that handles the message is detailed.  -->
-
 Like in other programming languages, the concept of sending a message to an object (or in other words invoking an object's method), is done using the dot operator `.`, like in `tv.change_channel('bbc')`. 
 
 ### Simple example

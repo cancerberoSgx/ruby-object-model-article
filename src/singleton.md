@@ -107,6 +107,9 @@ def obj.method2; end
 ![Method lookup and singleton classes](diagrams/method-lookup-singleton-class.png)
 
 
+
+<i id="inheritance-and-singleton-classes"></i>
+
 ### Inheritance and singleton classes
 
 As we said previously we represent the singleton class of an object named `obj` with `#obj`. Also, since classes are also objects, we represent the singleton class of a class named `MyClass` with `#MyClass`. As said before, class methods are methods of the class's singleton class, so class methods of `MyClass` are actually singleton methods of `#MyClass`. 
