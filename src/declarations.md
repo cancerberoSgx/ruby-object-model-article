@@ -43,21 +43,9 @@ p '  asd ss '.trim
 
 ### Modules
 
-<!-- TODO: Class is a Module  Class < Module < BaseObject. TODO: snippet -->
-
-
-<!-- modules can be explicitly `include`d in other classes to augment their instance methods, and instance variables. On this regard, one can think of modules as an alternative to inheritance that supports multiple inheritance or in other words, as a syntax to declare the "composition" part in "composition vs inheritance" discussions (TODO link).  -->
-
-
-<!-- module declaration -->
-
-<!-- The keyword `module` can be used to change the scope to a `class` with the only difference that instead of common class inheritance where the parent class is declared, a `module` is `include`d explicitly by any class. Since a class can `include` several modules, this provides with an alternative to class inheritance when multiple inheritance is needed. This somewhat remembers JavaScript object mixin. 
- -->
-
-Formally, the keyword `module`, similarly as `class` is a scope gate that can be used to declare instance methods and variables that can be `include`d by classes or other modules. 
+Formally, the keyword `module`, similarly as `class` is a scope gate that can be used to declare instance methods and variables that can be `include`d by classes or other modules. On this regard, one can think of including modules as multiple inheritance.
 
 An important fact to understand, as shown [before](#the-ruby-class-hierarchy) is that **`class` is a `module`, or in other words, `Class` extends `Module`**.
-<!-- by the following is that **classes are modules** -->
 
 Similarly to what we've shown in [Scope Gates](#scope-gates), the following snippet illustrates the basics of Ruby modules and how `self` changes in `module` declarations:
 
@@ -84,7 +72,6 @@ a = A.new
 a.method1
 ```
 
-<!-- TODO: how to declare instance variables or class method from module ?  -->
 
 <i id="refinements"></i>
 

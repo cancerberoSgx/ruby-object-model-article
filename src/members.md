@@ -39,7 +39,7 @@ etc
 
 ### Class macros
 
-The ability to run any code inside a class definition, plus its friendly syntax allow Ruby programmers to conceptualize what we call **class macros**. Formally, they are statements inside the class scope calling class methods to perform operations on the class itself, often using Ruby's metaprogramming API to modify the class behavior. 
+The ability to run any code inside a class definition, plus its friendly syntax allow Ruby programmers to conceptualize what we call **class macros**. Formally, they are statements inside the class scope calling class methods to perform operations on the class itself, often using Ruby's meta programming API to modify the class behavior. 
 
 When we described [accessors](#accessors), we where actually talking about `Module`'s class methods that are called in statements inside the class definition. The expression `attr :foo` for example is actually calling `Module.attr()` method. 
 

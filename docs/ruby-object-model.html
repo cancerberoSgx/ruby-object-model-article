@@ -1,80 +1,109 @@
 <!DOCTYPE html><html><head>
 	<meta charset="utf-8">
-<style type="text/css">
-.page-break { page-break-after: always; }
-.markdown-body { font-size: 1em; }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/2.10.0/github-markdown.min.css"><style type="text/css">
 .markdown-body pre > code { white-space: pre-wrap; }
+.markdown-body { font-size: 1em; }
+.page-break { page-break-after: always; }
 </style><style type="text/css">/*
-Monokai style - ported by Luigi Maselli - http://grigio.org
+
+github.com style (c) Vasily Polovnyov <vast@whiteants.net>
+
 */
 
 .hljs {
   display: block;
   overflow-x: auto;
   padding: 0.5em;
-  background: #272822; color: #ddd;
-}
-
-.hljs-tag,
-.hljs-keyword,
-.hljs-selector-tag,
-.hljs-literal,
-.hljs-strong,
-.hljs-name {
-  color: #f92672;
-}
-
-.hljs-code {
-  color: #66d9ef;
-}
-
-.hljs-class .hljs-title {
-  color: white;
-}
-
-.hljs-attribute,
-.hljs-symbol,
-.hljs-regexp,
-.hljs-link {
-  color: #bf79db;
-}
-
-.hljs-string,
-.hljs-bullet,
-.hljs-subst,
-.hljs-title,
-.hljs-section,
-.hljs-emphasis,
-.hljs-type,
-.hljs-built_in,
-.hljs-builtin-name,
-.hljs-selector-attr,
-.hljs-selector-pseudo,
-.hljs-addition,
-.hljs-variable,
-.hljs-template-tag,
-.hljs-template-variable {
-  color: #a6e22e;
+  color: #333;
+  background: #f8f8f8;
 }
 
 .hljs-comment,
-.hljs-quote,
-.hljs-deletion,
-.hljs-meta {
-  color: #75715e;
+.hljs-quote {
+  color: #998;
+  font-style: italic;
 }
 
 .hljs-keyword,
 .hljs-selector-tag,
-.hljs-literal,
-.hljs-doctag,
-.hljs-title,
-.hljs-section,
-.hljs-type,
-.hljs-selector-id {
+.hljs-subst {
+  color: #333;
   font-weight: bold;
 }
-/*# sourceURL=/Users/wyeworks/wye/ruby-object-model/node_modules/highlight.js/styles/monokai.css*/</style></head>
+
+.hljs-number,
+.hljs-literal,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag .hljs-attr {
+  color: #008080;
+}
+
+.hljs-string,
+.hljs-doctag {
+  color: #d14;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-selector-id {
+  color: #900;
+  font-weight: bold;
+}
+
+.hljs-subst {
+  font-weight: normal;
+}
+
+.hljs-type,
+.hljs-class .hljs-title {
+  color: #458;
+  font-weight: bold;
+}
+
+.hljs-tag,
+.hljs-name,
+.hljs-attribute {
+  color: #000080;
+  font-weight: normal;
+}
+
+.hljs-regexp,
+.hljs-link {
+  color: #009926;
+}
+
+.hljs-symbol,
+.hljs-bullet {
+  color: #990073;
+}
+
+.hljs-built_in,
+.hljs-builtin-name {
+  color: #0086b3;
+}
+
+.hljs-meta {
+  color: #999;
+  font-weight: bold;
+}
+
+.hljs-deletion {
+  background: #fdd;
+}
+
+.hljs-addition {
+  background: #dfd;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+/*# sourceURL=/Users/wyeworks/wye/ruby-object-model/node_modules/highlight.js/styles/github.css*/</style></head>
 <body class="markdown-body">
 <!-- Auto generated with 'npm run concat' -->
 
@@ -136,10 +165,10 @@ Monokai style - ported by Luigi Maselli - http://grigio.org
 </li>
 <li><a href="#method-lookup-and-singleton-classes">Method lookup and singleton classes</a></li>
 <li><a href="#inheritance-and-singleton-classes">Inheritance and singleton classes</a></li>
-<li><a href="#the-7-rules-of-the-ruby-object-model">The 7 Rules of the Ruby Object Model</a></li>
+<li><a href="#the-7-rules-of-ruby-object-model">The 7 Rules of Ruby Object Model</a></li>
 </ul>
 </li>
-<li><a href="#appendix-missing-methods-more-on-methods">Appendix: missing methods, More on methods</a><ul>
+<li><a href="#appendix-more-on-methods">Appendix: More on methods</a><ul>
 <li><a href="#method-objects">Method objects</a></li>
 <li><a href="#dynamic-methods">Dynamic methods</a></li>
 <li><a href="#method_missing">method_missing</a></li>
@@ -158,6 +187,9 @@ Monokai style - ported by Luigi Maselli - http://grigio.org
 
 <div class="page-break"></div>
 
+
+
+<p><i id="about-this-document"></i></p>
 <h2>About this document</h2>
 <p>When it comes to modeling a problem using an object oriented fashion, each language has its own peculiarities when it comes to, declaring objects and classes, code scope, object instantiation, inheritance, method lookup, etc. </p>
 <p>When we talk about <em>object model</em> we are referring basically to these aspects:</p>
@@ -171,9 +203,7 @@ Monokai style - ported by Luigi Maselli - http://grigio.org
 <li>how messages are dispatched how method lookup works</li>
 </ul>
 <p>This document tries to give a detailed description of how these things works and can be written in Ruby.</p>
- <!-- Particular emphasis is made on Ruby peculiarities compared to other programming languages such as scope, class expressions, .  -->
-
-<p>So, more than an Object Oriented Programming manual for Ruby, this document should be considered as descriptions on how objects work, understanding class declarations and Ruby peculiarities when dealing with objects, clkasses and methods.</p>
+<p>So, more than an Object Oriented Programming manual for Ruby, this document should be considered as descriptions on how objects work, understanding class declarations and Ruby peculiarities when dealing with objects, classes and methods.</p>
 <p>It assumes the reader has some background on object oriented programming such as the concepts of object, class, message, method and inheritance. Basic Ruby background is recommended although not needed since the code snippets are simple and commented.</p>
 <p>Aside, this is a millennial-friendly document: short paragraphs and code snippets right away!</p>
 <div class="page-break"></div>
@@ -395,21 +425,8 @@ p Sample.new.method1, Sample.new.method2</code></pre><p>Also, this allows to add
 <span class="hljs-keyword">end</span>
 p <span class="hljs-string">'  asd ss '</span>.trim</code></pre><p><i id="modules"></i></p>
 <h3>Modules</h3>
-<!-- TODO: Class is a Module  Class < Module < BaseObject. TODO: snippet -->
-
-
-<!-- modules can be explicitly `include`d in other classes to augment their instance methods, and instance variables. On this regard, one can think of modules as an alternative to inheritance that supports multiple inheritance or in other words, as a syntax to declare the "composition" part in "composition vs inheritance" discussions (TODO link).  -->
-
-
-<!-- module declaration -->
-
-<!-- The keyword `module` can be used to change the scope to a `class` with the only difference that instead of common class inheritance where the parent class is declared, a `module` is `include`d explicitly by any class. Since a class can `include` several modules, this provides with an alternative to class inheritance when multiple inheritance is needed. This somewhat remembers JavaScript object mixin. 
- -->
-
-<p>Formally, the keyword <code>module</code>, similarly as <code>class</code> is a scope gate that can be used to declare instance methods and variables that can be <code>include</code>d by classes or other modules. </p>
+<p>Formally, the keyword <code>module</code>, similarly as <code>class</code> is a scope gate that can be used to declare instance methods and variables that can be <code>include</code>d by classes or other modules. On this regard, one can think of including modules as multiple inheritance.</p>
 <p>An important fact to understand, as shown <a href="#the-ruby-class-hierarchy">before</a> is that <strong><code>class</code> is a <code>module</code>, or in other words, <code>Class</code> extends <code>Module</code></strong>.</p>
-<!-- by the following is that **classes are modules** -->
-
 <p>Similarly to what we’ve shown in <a href="#scope-gates">Scope Gates</a>, the following snippet illustrates the basics of Ruby modules and how <code>self</code> changes in <code>module</code> declarations:</p>
 <pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">module</span> <span class="hljs-title">Module1</span></span>
   <span class="hljs-comment"># inside the module scope and outside method declarations, self represent the module </span>
@@ -430,9 +447,7 @@ p <span class="hljs-string">'  asd ss '</span>.trim</code></pre><p><i id="module
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 a = A.new
-a.method1</code></pre><!-- TODO: how to declare instance variables or class method from module ?  -->
-
-<p><i id="refinements"></i></p>
+a.method1</code></pre><p><i id="refinements"></i></p>
 <h3>Refinements</h3>
 <p>In <a href="open-class">Open Class</a> we shown how existing classes can be modified by just opening <code>class</code> several times. An important consequence is that any of this modifications will impact the rest of the code “globally” which could cause unexpected behaviors other part of the code that rely on a modified behavior. </p>
 <p>To solve this problem, Ruby supports <code>refine</code> which basically allows to open classes but only for local code, without affecting outer code at all:</p>
@@ -454,6 +469,7 @@ p <span class="hljs-string">'hello'</span>.reverse    <span class="hljs-comment"
 <p><i id="messages-&amp;-methods"></i></p>
 <h2>Messages &amp; methods</h2>
 <p>Like in other programming languages, the concept of sending a message to an object (or in other words invoking an object’s method), is done using the dot operator <code>.</code>, like in <code>tv.change_channel('bbc')</code>. </p>
+<p><i id="simple-example"></i></p>
 <h3>Simple example</h3>
 <p>User optionally passes a list of arguments and given object method is invoked using the <em>target object</em> as <code>self</code> in the method’s body code. The expression evaluates in whatever the method returns: </p>
 <pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Car</span></span>
@@ -524,7 +540,8 @@ result = my_object.players <span class="hljs-symbol">serie_id:</span> <span clas
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 t = Time.now + <span class="hljs-number">1</span>
-wait_for(proc { Time.now &gt; t }) { print <span class="hljs-string">'1 second passed'</span> }</code></pre><h4>yield_self, a.k.a then</h4>
+wait_for(proc { Time.now &gt; t }) { print <span class="hljs-string">'1 second passed'</span> }</code></pre><p><i id="yield_self-aka-then"></i></p>
+<h4>yield_self, a.k.a then</h4>
 <p>Ruby objects support the method <code>yield_self</code> (and its alias <code>then</code>). The idea is simple, just pass <code>self</code> as the argument to the message block. </p>
 <p>In the snippet <code>print 2.yield_self { |n| n * 3.14 }</code> we send the yield_self message to the object <code>2</code> which causes given message block to be invoked passing <code>2</code> as argument. In the previous code, parameter <code>n</code>‘s value will be <code>2</code>.</p>
 <p>Using its alias <code>then</code> we can write data transformation as a series of <code>then</code>s - feels familiar to JavaScript promises or Elixir pipe operator (<code>|&gt;</code>):</p>
@@ -559,7 +576,7 @@ Foo.new.public_method</code></pre><p>Running the snippet will throw <code>NoMeth
 attr_writable :bar
 etc</code></pre><p><i id="class-macros"></i></p>
 <h3>Class macros</h3>
-<p>The ability to run any code inside a class definition, plus its friendly syntax allow Ruby programmers to conceptualize what we call <strong>class macros</strong>. Formally, they are statements inside the class scope calling class methods to perform operations on the class itself, often using Ruby’s metaprogramming API to modify the class behavior. </p>
+<p>The ability to run any code inside a class definition, plus its friendly syntax allow Ruby programmers to conceptualize what we call <strong>class macros</strong>. Formally, they are statements inside the class scope calling class methods to perform operations on the class itself, often using Ruby’s meta programming API to modify the class behavior. </p>
 <p>When we described <a href="#accessors">accessors</a>, we where actually talking about <code>Module</code>‘s class methods that are called in statements inside the class definition. The expression <code>attr :foo</code> for example is actually calling <code>Module.attr()</code> method. </p>
 <p>For Ruby newcomers, expressions like <code>attr :foo</code> in the middle of class definitions could look like a syntax thing, but actually there’s no special syntax at all, we are just calling a class method that will modify the class to support <code>attr</code> semantics.</p>
 <p>Let’s write our own class macro <code>second</code>, that, given a method named <code>name</code> it will create a second method named <code>"#{name}2"</code> that calls the original method and log the call:</p>
@@ -623,16 +640,6 @@ print a + b <span class="hljs-comment"># =&gt; ComplexNumber(3, 3)</span></code>
 <h2>The singleton scope</h2>
 <p>Remember how we <a href="#methods">said before</a> that an object’s methods are actually part of the object’s class and not the object itself? The implication is that objects of the same class share their methods. </p>
 <p>Sometimes though, is useful to support custom object’s behavior independently of a particular class, this is, given an object patch the object itself with custom behavior, without impacting the object’s class. </p>
-<p>This makes </p>
-<p>Although this is often not supported by static languages like Java or C++, other scripting languages like JavaScript supports this very straightforward:</p>
-<!-- belong to an object class not to the object itself, then all instances of a class are not part of instances but part of the instance's class. -->
-
-<!-- This section describe how Ruby's solves this problemsingleton methods and singleton classes a Ruby way of defining per-object custom behavior. -->
-
-
-<!-- Until now, objects of the same class have the same methods since methods are defined at the class level.  -->
-<!-- If you came from other scripting languages, such as JavaScript, then you know it's possible to define new methods to a single object without affecting its class as simply as: -->
-
 <pre><code class="hljs js"><span class="hljs-keyword">var</span> obj = <span class="hljs-keyword">new</span> MyClass
 obj.method1 = <span class="hljs-function"><span class="hljs-keyword">function</span>(<span class="hljs-params"></span>) </span>{ 
   <span class="hljs-keyword">return</span> <span class="hljs-string">'hello'</span> 
@@ -645,8 +652,6 @@ obj.method1 = <span class="hljs-function"><span class="hljs-keyword">function</s
   <span class="hljs-string">'hello'</span>
 <span class="hljs-keyword">end</span></code></pre><p>As you can see we’ve defined a new method <code>method1</code> but just for the instance <code>obj</code>. The rest of <code>MyClass</code> instances won’t have it.</p>
 <p>Notice how we use the scope gate <code>def</code> to define method <code>obj.method1</code> without using the <code>class</code> operator. </p>
-<!-- We already made something similar when we used `def self.my_method` to define class methods, but this time we use `obj` instead of `self` - both `self` and `obj` are objects and we can use the same synyax without scope gate `class` to define  -->
-
 <p>The same as before but using <code>define_singleton_method</code> so we don’t need to use <code>class</code> scope gate:</p>
 <pre><code class="hljs rb">obj = MyClass.new
 obj.define_singleton_method(<span class="hljs-symbol">:method1</span>) { <span class="hljs-string">'hello'</span> }</code></pre><p>An interesting fact is that, <strong>class methods are actually singleton methods of the class</strong>. For example in <code>MyClass.my_class_method()</code>, <code>my_class_method</code> is actually a singleton method of <code>MyClass</code>.</p>
@@ -654,22 +659,16 @@ obj.define_singleton_method(<span class="hljs-symbol">:method1</span>) { <span c
 <h3>Singleton classes</h3>
 <p>So, where do these <em>singleton methods</em> live ? As we <a href="#methods">said</a>, methods are not part of instances but part of the instance’s class. On the other side, singleton methods couldn’t be part of the object class since if so, all instances of the class would support them. So, where are singleton methods stored in the Ruby Object Model ? </p>
 <p>In Ruby, objects are associated not only with a class but also with what we call <em>the object’s singleton class</em></p>
-<!-- When you ask an object for its class, Ruby, doesn't always tell you the whole truth. Instead of the class that you see, an object can have its own special hidden class. That's called the *singleton class* of the object. (Also called the *metaclass* or the *eigenclass*). -->
-<p>So while we use <code>obj.class</code> to access an object “normal” class, we use <code>obj.singleton_class</code> to access an object singleton class. </p>
+<p>So while we use <code>obj.class</code> to access an object “normal” class, we use <code>obj.singleton_class</code> to access an object singleton class. Ruby’s singleton class is often also called the <em>meta class</em> or the <em>eigenclass</em></p>
 <h4><code>class &lt;&lt; obj</code> - the singleton class scope gate</h4>
 <p>Ruby also supports another syntax besides <code>singleton_class</code> to access an object’s singleton class which is based on the <code>class</code> keyword:</p>
-<!-- (BTW, before Ruby TODO.TODO this was the only way to access an object singleton class):  -->
-
 <pre><code class="hljs rb">obj = MyClass.new
 <span class="hljs-class"><span class="hljs-keyword">class</span> &lt;&lt; obj</span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method1</span></span>
     <span class="hljs-string">'hello'</span>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span></code></pre><p>Remember how we said <code>class</code> is a scope gate ? Well in this case the expression <code>class &lt;&lt; obj</code> opens the scope to <code>obj</code>‘s singleton class the same way <code>class C</code> opens the scope to a “normal” <code>C</code> class. Methods and instance variables defined inside will belong to <code>obj</code>‘s singleton class. </p>
-<!-- TODO: singleton class notation (obj - MyClass, #obj) - #obj represents the singleton class of object `obj` -->
-
 <p>TODO: <code>obj.singleton_class</code> extends <code>obj.class</code></p>
-<p>TODO: golden object model rules - pg 125</p>
 <h3>Method lookup and singleton classes</h3>
 <p>Previously, in <a href="#method-lookup">Method lookup</a>, we explained how the Ruby interpreter finds a method. Well, that was without considering singleton classes. Now that we know they exists, the missing part is the role of singleton methods in this scenario. </p>
 <p>Heads up: We represent the singleton class of an object <code>obj</code> with <code>#obj</code>.</p>
@@ -683,7 +682,8 @@ obj = MyClass.new
 <p>As we said previously we represent the singleton class of an object named <code>obj</code> with <code>#obj</code>. Also, since classes are also objects, we represent the singleton class of a class named <code>MyClass</code> with <code>#MyClass</code>. As said before, class methods are methods of the class’s singleton class, so class methods of <code>MyClass</code> are actually singleton methods of <code>#MyClass</code>. </p>
 <p>The following diagram shows the relationship between <code>class</code>, <code>singleton_class</code> and <code>superclass</code>.</p>
 <p><img src="diagrams/singleton_class-superclass.jpg" alt="Singleton classes and superclass"></p>
-<h3>The 7 Rules of the Ruby Object Model</h3>
+<p><i id="the-7-rules-of-ruby-object-model"></i></p>
+<h3>The 7 Rules of Ruby Object Model</h3>
 <p>In this mix of classes, singleton classes, instance methods, class methods and singleton methods, a Ruby developer could have a hard time answering questions like: “Which method in this complicated hierarchy gets called first?” or “Can I call this method from that object?”. The following seven rules describe the relationwhip between classes, singleton classes, instance methods, class methods and singleton methods and also gives a recipe on how method lookup works, now considering singleton classes and singleton methods:</p>
 <ol>
 <li>There is only one kind of object - be it a regular object or a module.</li>
@@ -700,8 +700,11 @@ obj = MyClass.new
 
 
 
-<h2>Appendix: missing methods, More on methods</h2>
+
+<p><i id="appendix-more-on-methods"></i></p>
+<h2>Appendix: More on methods</h2>
 <p>This section describes techniques available in Ruby regarding method dispatch, proxies and hooks. It’s somewhat related with what we call meta programming. </p>
+<p><i id="method-objects"></i></p>
 <h3>Method objects</h3>
 <p>Methods can also be manipulated as objects by using <code>Kernel#method</code> method. It will return the method itself as a <code>Method</code> object that can be later executed using <code>Method#call</code>.</p>
 <pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
@@ -715,6 +718,7 @@ obj = MyClass.new
 object = MyClass.new(<span class="hljs-number">1</span>)
 m = object.method <span class="hljs-symbol">:my_method</span>
 m.call <span class="hljs-comment"># =&gt; 1</span></code></pre><p>The same applies to singleton methods by using <code>Kernel#singleton_method</code>.</p>
+<p><i id="dynamic-methods"></i></p>
 <h3>Dynamic methods</h3>
 <p>We can call any method dynamically using <code>Object#send</code>, even private methods: </p>
 <pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
@@ -738,7 +742,8 @@ p <span class="hljs-number">1</span>.send(<span class="hljs-symbol">:+</span>, <
 obj = MyClass.new
 obj.non_existent_method(<span class="hljs-string">'a'</span>, <span class="hljs-number">3.14</span>) { }</code></pre><p>It will print:</p>
 <pre><code class="hljs plaintext">You called: non_existent_method(a, 3.14)
-(You also passed it a block)</code></pre><h3>Ghost methods and dynamic proxies</h3>
+(You also passed it a block)</code></pre><p><i id="ghost-methods-and-dynamic-proxies"></i></p>
+<h3>Ghost methods and dynamic proxies</h3>
 <p>As seen in previous section, using by overriding <code>BaseObject#method_missing</code> we can implement methods such as, from the point of view of the caller they will look like simple method calls, but on the receiver’s side they have no corresponding method implementation. This technique is often called <em>Ghost Method</em>. </p>
 <p>Let’s implement a class which purpose is to be a Hash-like structure, but unlike Ruby’s <code>Hash</code>, properties can be accessed using the accessor operator <code>.</code> and assigned using <code>=</code>:</p>
 <pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyHash</span></span>
@@ -756,14 +761,16 @@ obj.non_existent_method(<span class="hljs-string">'a'</span>, <span class="hljs-
 <span class="hljs-keyword">end</span>
 hash = MyHash.new
 hash.foo = <span class="hljs-number">1</span>
-p hash.foo <span class="hljs-comment"># =&gt; 1</span></code></pre><h3>respond_to_missing</h3>
+p hash.foo <span class="hljs-comment"># =&gt; 1</span></code></pre><p><i id="respond_to_missing"></i></p>
+<h3>respond_to_missing</h3>
 <p>Since Ruby object’s also support the method <code>respond_to?</code> for knowing if an object understand a certain method, when implementing ghost methods, we might want to include them in <code>respond_to?</code>. For this we need to override <code>respond_to_missing</code> to return our ghost method names.</p>
 <p>In the past, Ruby coders used to override <code>respond_to?</code> directly but now that practice is considered somewhat dirty and overriding <code>respond_to_missing</code> is preferred.</p>
+<p><i id="blank-slates"></i></p>
 <h3>Blank slates</h3>
 <p>When implementing dynamic proxies, like our <code>MyHash</code> class shown above, existing <code>Object</code> methods (which are not few) could collide with our ghost methods. In our example, since <code>Object</code> already has a method called <code>display</code>, hash keys named <code>display</code> won’t work as expected: </p>
 <pre><code class="hljs rb">hash = MyHash.new
 hash.display = <span class="hljs-string">'hello'</span>
-p hash.display  <span class="hljs-comment"># =&gt; #&lt;MyHash:0x00007fce330638b8&gt;nil</span></code></pre><p>A way to workaround this problem is to extend BaseObject instead of <code>Object</code> since it has only a couple of instance methods so these kind of collisions are less probable:</p>
+p hash.display  <span class="hljs-comment"># =&gt; #&lt;MyHash:0x00007fce330638b8&gt;nil</span></code></pre><p>A way to workaround this problem is to extend from <code>BaseObject</code> instead of <code>Object</code> since it has only a couple of instance methods so these kind of collisions are less probable:</p>
 <pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyHash</span> &lt; BaseObject</span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span></span>
     @data = {}
@@ -779,7 +786,7 @@ p hash.display  <span class="hljs-comment"># =&gt; #&lt;MyHash:0x00007fce330638b
 <span class="hljs-keyword">end</span>
 hash = MyHash.new
 hash.display = <span class="hljs-string">'hello'</span>
-p hash.display  <span class="hljs-comment"># =&gt; hello</span></code></pre><p>And if you need even more control, we could even use <code>undef_method</code> to remove an existing method.</p>
+p hash.display  <span class="hljs-comment"># =&gt; hello</span></code></pre><p>And if you need even more control, we could even use <code>undef_method</code> to remove existing methods.</p>
 <h2>Appendix: Constants</h2>
 <p>In Ruby, any reference that <strong>starts with an uppercase letter</strong>, including name of classes and modules, is a <em>constant</em>. Ruby constants are very peculiar when compared to other programming language’s constants. </p>
 <p>First of all, unlike other programming languages, Ruby constants can be changed and reassigned. For example, try to re-assign constant <code>String</code> to break Ruby beyond repair. </p>

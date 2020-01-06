@@ -1,6 +1,12 @@
-## Appendix: missing methods, More on methods
+
+<i id="appendix-more-on-methods"></i>
+
+## Appendix: More on methods
 
 This section describes techniques available in Ruby regarding method dispatch, proxies and hooks. It's somewhat related with what we call meta programming. 
+
+
+<i id="method-objects"></i>
 
 ### Method objects
 
@@ -21,6 +27,9 @@ m.call # => 1
 ```
 
 The same applies to singleton methods by using `Kernel#singleton_method`.
+
+
+<i id="dynamic-methods"></i>
 
 ### Dynamic methods
 
@@ -66,6 +75,8 @@ You called: non_existent_method(a, 3.14)
 (You also passed it a block)
 ```
 
+<i id="ghost-methods-and-dynamic-proxies"></i>
+
 ### Ghost methods and dynamic proxies
 
 As seen in previous section, using by overriding `BaseObject#method_missing` we can implement methods such as, from the point of view of the caller they will look like simple method calls, but on the receiver's side they have no corresponding method implementation. This technique is often called *Ghost Method*. 
@@ -91,11 +102,16 @@ hash.foo = 1
 p hash.foo # => 1
 ```
 
+<i id="respond_to_missing"></i>
+
 ### respond_to_missing
 
 Since Ruby object's also support the method `respond_to?` for knowing if an object understand a certain method, when implementing ghost methods, we might want to include them in `respond_to?`. For this we need to override `respond_to_missing` to return our ghost method names.
 
 In the past, Ruby coders used to override `respond_to?` directly but now that practice is considered somewhat dirty and overriding `respond_to_missing` is preferred.
+
+
+<i id="blank-slates"></i>
 
 ### Blank slates
 
@@ -107,7 +123,7 @@ hash.display = 'hello'
 p hash.display  # => #<MyHash:0x00007fce330638b8>nil
 ```
 
-A way to workaround this problem is to extend BaseObject instead of `Object` since it has only a couple of instance methods so these kind of collisions are less probable:
+A way to workaround this problem is to extend from `BaseObject` instead of `Object` since it has only a couple of instance methods so these kind of collisions are less probable:
 
 ```rb
 class MyHash < BaseObject
@@ -128,4 +144,4 @@ hash.display = 'hello'
 p hash.display  # => hello
 ```
 
-And if you need even more control, we could even use `undef_method` to remove an existing method.
+And if you need even more control, we could even use `undef_method` to remove existing methods.

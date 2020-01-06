@@ -7,18 +7,6 @@ Remember how we [said before](#methods) that an object's methods are actually pa
 
 Sometimes though, is useful to support custom object's behavior independently of a particular class, this is, given an object patch the object itself with custom behavior, without impacting the object's class. 
 
-This makes 
-
-Although this is often not supported by static languages like Java or C++, other scripting languages like JavaScript supports this very straightforward:
-
-<!-- belong to an object class not to the object itself, then all instances of a class are not part of instances but part of the instance's class. -->
-
-<!-- This section describe how Ruby's solves this problemsingleton methods and singleton classes a Ruby way of defining per-object custom behavior. -->
-
-
-<!-- Until now, objects of the same class have the same methods since methods are defined at the class level.  -->
-<!-- If you came from other scripting languages, such as JavaScript, then you know it's possible to define new methods to a single object without affecting its class as simply as: -->
-
 ```js
 var obj = new MyClass
 obj.method1 = function() { 
@@ -27,6 +15,8 @@ obj.method1 = function() {
 ```
 
 Can we accomplish this in Ruby? The answer to this question will give us the chance to learn Ruby language core features: *singleton methods* and *singleton classes*.
+
+
 
 <i id="singleton-methods"></i>
 
@@ -44,7 +34,6 @@ end
 As you can see we've defined a new method `method1` but just for the instance `obj`. The rest of `MyClass` instances won't have it.
 
 Notice how we use the scope gate `def` to define method `obj.method1` without using the `class` operator. 
-<!-- We already made something similar when we used `def self.my_method` to define class methods, but this time we use `obj` instead of `self` - both `self` and `obj` are objects and we can use the same synyax without scope gate `class` to define  -->
 
 The same as before but using `define_singleton_method` so we don't need to use `class` scope gate:
 
@@ -55,6 +44,8 @@ obj.define_singleton_method(:method1) { 'hello' }
 
 An interesting fact is that, **class methods are actually singleton methods of the class**. For example in `MyClass.my_class_method()`, `my_class_method` is actually a singleton method of `MyClass`.
 
+
+
 <i id="singleton-classes"></i>
 
 ### Singleton classes
@@ -63,14 +54,11 @@ So, where do these *singleton methods* live ? As we [said](#methods), methods ar
 
 In Ruby, objects are associated not only with a class but also with what we call *the object's singleton class*
 
-<!-- When you ask an object for its class, Ruby, doesn't always tell you the whole truth. Instead of the class that you see, an object can have its own special hidden class. That's called the *singleton class* of the object. (Also called the *metaclass* or the *eigenclass*). -->
-So while we use `obj.class` to access an object "normal" class, we use `obj.singleton_class` to access an object singleton class. 
+So while we use `obj.class` to access an object "normal" class, we use `obj.singleton_class` to access an object singleton class. Ruby's singleton class is often also called the *meta class* or the *eigenclass*
 
 #### `class << obj` - the singleton class scope gate
 
 Ruby also supports another syntax besides `singleton_class` to access an object's singleton class which is based on the `class` keyword:
-
-<!-- (BTW, before Ruby TODO.TODO this was the only way to access an object singleton class):  -->
 
 ```rb
 obj = MyClass.new
@@ -83,11 +71,8 @@ end
 
 Remember how we said `class` is a scope gate ? Well in this case the expression `class << obj` opens the scope to `obj`'s singleton class the same way `class C` opens the scope to a "normal" `C` class. Methods and instance variables defined inside will belong to `obj`'s singleton class. 
 
-<!-- TODO: singleton class notation (obj - MyClass, #obj) - #obj represents the singleton class of object `obj` -->
-
 TODO: `obj.singleton_class` extends `obj.class`
 
-TODO: golden object model rules - pg 125
 
 
 ### Method lookup and singleton classes
@@ -119,7 +104,9 @@ The following diagram shows the relationship between `class`, `singleton_class` 
 ![Singleton classes and superclass](diagrams/singleton_class-superclass.jpg)
 
 
-### The 7 Rules of the Ruby Object Model
+<i id="the-7-rules-of-ruby-object-model"></i>
+
+### The 7 Rules of Ruby Object Model
 
 In this mix of classes, singleton classes, instance methods, class methods and singleton methods, a Ruby developer could have a hard time answering questions like: "Which method in this complicated hierarchy gets called first?" or "Can I call this method from that object?". The following seven rules describe the relationwhip between classes, singleton classes, instance methods, class methods and singleton methods and also gives a recipe on how method lookup works, now considering singleton classes and singleton methods:
 
@@ -130,6 +117,8 @@ In this mix of classes, singleton classes, instance methods, class methods and s
  5. Every class, with the exception of `basicObject`, has exactly one ancestor - either a superclass or a module. This means you have a single chain of ancestors from any class up to `BasicObject`.
  6. The superclass of a singleton class of an object is the object's class. The superclass of the singleton class of a class is the singleton class of the class's superclass. (Yes, it sounds like a tongue twister, we tried to describe this in [Inheritance and singleton classes](#inheritance-and-singleton-classes)).
  7. When you call a method, Ruby goes "right" in the receiver's real class and then "up" the ancestors chain. That's all there's to know about the way Ruby finds methods. 
+
+
 
 <div class="page-break"></div>
 

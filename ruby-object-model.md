@@ -46,8 +46,8 @@ Sebastián Gurin - [WyeWorks](wyeworks.com)
     + [`class << obj` - the singleton class scope gate](#class--obj---the-singleton-class-scope-gate)
   * [Method lookup and singleton classes](#method-lookup-and-singleton-classes)
   * [Inheritance and singleton classes](#inheritance-and-singleton-classes)
-  * [The 7 Rules of the Ruby Object Model](#the-7-rules-of-the-ruby-object-model)
-- [Appendix: missing methods, More on methods](#appendix-missing-methods-more-on-methods)
+  * [The 7 Rules of Ruby Object Model](#the-7-rules-of-ruby-object-model)
+- [Appendix: More on methods](#appendix-more-on-methods)
   * [Method objects](#method-objects)
   * [Dynamic methods](#dynamic-methods)
   * [method_missing](#method_missing)
@@ -61,6 +61,10 @@ Sebastián Gurin - [WyeWorks](wyeworks.com)
 <!-- tocstop -->
 
 <div class="page-break"></div>
+
+
+
+<i id="about-this-document"></i>
 
 ## About this document
 
@@ -78,9 +82,7 @@ When we talk about *object model* we are referring basically to these aspects:
 
 This document tries to give a detailed description of how these things works and can be written in Ruby.
 
- <!-- Particular emphasis is made on Ruby peculiarities compared to other programming languages such as scope, class expressions, .  -->
-
-So, more than an Object Oriented Programming manual for Ruby, this document should be considered as descriptions on how objects work, understanding class declarations and Ruby peculiarities when dealing with objects, clkasses and methods.
+So, more than an Object Oriented Programming manual for Ruby, this document should be considered as descriptions on how objects work, understanding class declarations and Ruby peculiarities when dealing with objects, classes and methods.
 
 It assumes the reader has some background on object oriented programming such as the concepts of object, class, message, method and inheritance. Basic Ruby background is recommended although not needed since the code snippets are simple and commented.
 
@@ -445,21 +447,9 @@ p '  asd ss '.trim
 
 ### Modules
 
-<!-- TODO: Class is a Module  Class < Module < BaseObject. TODO: snippet -->
-
-
-<!-- modules can be explicitly `include`d in other classes to augment their instance methods, and instance variables. On this regard, one can think of modules as an alternative to inheritance that supports multiple inheritance or in other words, as a syntax to declare the "composition" part in "composition vs inheritance" discussions (TODO link).  -->
-
-
-<!-- module declaration -->
-
-<!-- The keyword `module` can be used to change the scope to a `class` with the only difference that instead of common class inheritance where the parent class is declared, a `module` is `include`d explicitly by any class. Since a class can `include` several modules, this provides with an alternative to class inheritance when multiple inheritance is needed. This somewhat remembers JavaScript object mixin. 
- -->
-
-Formally, the keyword `module`, similarly as `class` is a scope gate that can be used to declare instance methods and variables that can be `include`d by classes or other modules. 
+Formally, the keyword `module`, similarly as `class` is a scope gate that can be used to declare instance methods and variables that can be `include`d by classes or other modules. On this regard, one can think of including modules as multiple inheritance.
 
 An important fact to understand, as shown [before](#the-ruby-class-hierarchy) is that **`class` is a `module`, or in other words, `Class` extends `Module`**.
-<!-- by the following is that **classes are modules** -->
 
 Similarly to what we've shown in [Scope Gates](#scope-gates), the following snippet illustrates the basics of Ruby modules and how `self` changes in `module` declarations:
 
@@ -486,7 +476,6 @@ a = A.new
 a.method1
 ```
 
-<!-- TODO: how to declare instance variables or class method from module ?  -->
 
 <i id="refinements"></i>
 
@@ -521,6 +510,8 @@ p 'hello'.reverse    # "olleh"
 ## Messages & methods
 
 Like in other programming languages, the concept of sending a message to an object (or in other words invoking an object's method), is done using the dot operator `.`, like in `tv.change_channel('bbc')`. 
+
+<i id="simple-example"></i>
 
 ### Simple example
 
@@ -651,6 +642,9 @@ t = Time.now + 1
 wait_for(proc { Time.now > t }) { print '1 second passed' }
 ```
 
+
+<i id="yield_self-aka-then"></i>
+
 #### yield_self, a.k.a then
 
 Ruby objects support the method `yield_self` (and its alias `then`). The idea is simple, just pass `self` as the argument to the message block. 
@@ -715,7 +709,7 @@ etc
 
 ### Class macros
 
-The ability to run any code inside a class definition, plus its friendly syntax allow Ruby programmers to conceptualize what we call **class macros**. Formally, they are statements inside the class scope calling class methods to perform operations on the class itself, often using Ruby's metaprogramming API to modify the class behavior. 
+The ability to run any code inside a class definition, plus its friendly syntax allow Ruby programmers to conceptualize what we call **class macros**. Formally, they are statements inside the class scope calling class methods to perform operations on the class itself, often using Ruby's meta programming API to modify the class behavior. 
 
 When we described [accessors](#accessors), we where actually talking about `Module`'s class methods that are called in statements inside the class definition. The expression `attr :foo` for example is actually calling `Module.attr()` method. 
 
@@ -809,18 +803,6 @@ Remember how we [said before](#methods) that an object's methods are actually pa
 
 Sometimes though, is useful to support custom object's behavior independently of a particular class, this is, given an object patch the object itself with custom behavior, without impacting the object's class. 
 
-This makes 
-
-Although this is often not supported by static languages like Java or C++, other scripting languages like JavaScript supports this very straightforward:
-
-<!-- belong to an object class not to the object itself, then all instances of a class are not part of instances but part of the instance's class. -->
-
-<!-- This section describe how Ruby's solves this problemsingleton methods and singleton classes a Ruby way of defining per-object custom behavior. -->
-
-
-<!-- Until now, objects of the same class have the same methods since methods are defined at the class level.  -->
-<!-- If you came from other scripting languages, such as JavaScript, then you know it's possible to define new methods to a single object without affecting its class as simply as: -->
-
 ```js
 var obj = new MyClass
 obj.method1 = function() { 
@@ -829,6 +811,8 @@ obj.method1 = function() {
 ```
 
 Can we accomplish this in Ruby? The answer to this question will give us the chance to learn Ruby language core features: *singleton methods* and *singleton classes*.
+
+
 
 <i id="singleton-methods"></i>
 
@@ -846,7 +830,6 @@ end
 As you can see we've defined a new method `method1` but just for the instance `obj`. The rest of `MyClass` instances won't have it.
 
 Notice how we use the scope gate `def` to define method `obj.method1` without using the `class` operator. 
-<!-- We already made something similar when we used `def self.my_method` to define class methods, but this time we use `obj` instead of `self` - both `self` and `obj` are objects and we can use the same synyax without scope gate `class` to define  -->
 
 The same as before but using `define_singleton_method` so we don't need to use `class` scope gate:
 
@@ -857,6 +840,8 @@ obj.define_singleton_method(:method1) { 'hello' }
 
 An interesting fact is that, **class methods are actually singleton methods of the class**. For example in `MyClass.my_class_method()`, `my_class_method` is actually a singleton method of `MyClass`.
 
+
+
 <i id="singleton-classes"></i>
 
 ### Singleton classes
@@ -865,14 +850,11 @@ So, where do these *singleton methods* live ? As we [said](#methods), methods ar
 
 In Ruby, objects are associated not only with a class but also with what we call *the object's singleton class*
 
-<!-- When you ask an object for its class, Ruby, doesn't always tell you the whole truth. Instead of the class that you see, an object can have its own special hidden class. That's called the *singleton class* of the object. (Also called the *metaclass* or the *eigenclass*). -->
-So while we use `obj.class` to access an object "normal" class, we use `obj.singleton_class` to access an object singleton class. 
+So while we use `obj.class` to access an object "normal" class, we use `obj.singleton_class` to access an object singleton class. Ruby's singleton class is often also called the *meta class* or the *eigenclass*
 
 #### `class << obj` - the singleton class scope gate
 
 Ruby also supports another syntax besides `singleton_class` to access an object's singleton class which is based on the `class` keyword:
-
-<!-- (BTW, before Ruby TODO.TODO this was the only way to access an object singleton class):  -->
 
 ```rb
 obj = MyClass.new
@@ -885,11 +867,8 @@ end
 
 Remember how we said `class` is a scope gate ? Well in this case the expression `class << obj` opens the scope to `obj`'s singleton class the same way `class C` opens the scope to a "normal" `C` class. Methods and instance variables defined inside will belong to `obj`'s singleton class. 
 
-<!-- TODO: singleton class notation (obj - MyClass, #obj) - #obj represents the singleton class of object `obj` -->
-
 TODO: `obj.singleton_class` extends `obj.class`
 
-TODO: golden object model rules - pg 125
 
 
 ### Method lookup and singleton classes
@@ -921,7 +900,9 @@ The following diagram shows the relationship between `class`, `singleton_class` 
 ![Singleton classes and superclass](diagrams/singleton_class-superclass.jpg)
 
 
-### The 7 Rules of the Ruby Object Model
+<i id="the-7-rules-of-ruby-object-model"></i>
+
+### The 7 Rules of Ruby Object Model
 
 In this mix of classes, singleton classes, instance methods, class methods and singleton methods, a Ruby developer could have a hard time answering questions like: "Which method in this complicated hierarchy gets called first?" or "Can I call this method from that object?". The following seven rules describe the relationwhip between classes, singleton classes, instance methods, class methods and singleton methods and also gives a recipe on how method lookup works, now considering singleton classes and singleton methods:
 
@@ -933,15 +914,23 @@ In this mix of classes, singleton classes, instance methods, class methods and s
  6. The superclass of a singleton class of an object is the object's class. The superclass of the singleton class of a class is the singleton class of the class's superclass. (Yes, it sounds like a tongue twister, we tried to describe this in [Inheritance and singleton classes](#inheritance-and-singleton-classes)).
  7. When you call a method, Ruby goes "right" in the receiver's real class and then "up" the ancestors chain. That's all there's to know about the way Ruby finds methods. 
 
+
+
 <div class="page-break"></div>
 
 
 
 
 
-## Appendix: missing methods, More on methods
+
+<i id="appendix-more-on-methods"></i>
+
+## Appendix: More on methods
 
 This section describes techniques available in Ruby regarding method dispatch, proxies and hooks. It's somewhat related with what we call meta programming. 
+
+
+<i id="method-objects"></i>
 
 ### Method objects
 
@@ -962,6 +951,9 @@ m.call # => 1
 ```
 
 The same applies to singleton methods by using `Kernel#singleton_method`.
+
+
+<i id="dynamic-methods"></i>
 
 ### Dynamic methods
 
@@ -1007,6 +999,8 @@ You called: non_existent_method(a, 3.14)
 (You also passed it a block)
 ```
 
+<i id="ghost-methods-and-dynamic-proxies"></i>
+
 ### Ghost methods and dynamic proxies
 
 As seen in previous section, using by overriding `BaseObject#method_missing` we can implement methods such as, from the point of view of the caller they will look like simple method calls, but on the receiver's side they have no corresponding method implementation. This technique is often called *Ghost Method*. 
@@ -1032,11 +1026,16 @@ hash.foo = 1
 p hash.foo # => 1
 ```
 
+<i id="respond_to_missing"></i>
+
 ### respond_to_missing
 
 Since Ruby object's also support the method `respond_to?` for knowing if an object understand a certain method, when implementing ghost methods, we might want to include them in `respond_to?`. For this we need to override `respond_to_missing` to return our ghost method names.
 
 In the past, Ruby coders used to override `respond_to?` directly but now that practice is considered somewhat dirty and overriding `respond_to_missing` is preferred.
+
+
+<i id="blank-slates"></i>
 
 ### Blank slates
 
@@ -1048,7 +1047,7 @@ hash.display = 'hello'
 p hash.display  # => #<MyHash:0x00007fce330638b8>nil
 ```
 
-A way to workaround this problem is to extend BaseObject instead of `Object` since it has only a couple of instance methods so these kind of collisions are less probable:
+A way to workaround this problem is to extend from `BaseObject` instead of `Object` since it has only a couple of instance methods so these kind of collisions are less probable:
 
 ```rb
 class MyHash < BaseObject
@@ -1069,7 +1068,7 @@ hash.display = 'hello'
 p hash.display  # => hello
 ```
 
-And if you need even more control, we could even use `undef_method` to remove an existing method.
+And if you need even more control, we could even use `undef_method` to remove existing methods.
 
 ## Appendix: Constants
 

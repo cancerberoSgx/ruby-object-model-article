@@ -6,6 +6,8 @@
 
 Like in other programming languages, the concept of sending a message to an object (or in other words invoking an object's method), is done using the dot operator `.`, like in `tv.change_channel('bbc')`. 
 
+<i id="simple-example"></i>
+
 ### Simple example
 
 User optionally passes a list of arguments and given object method is invoked using the *target object* as `self` in the method's body code. The expression evaluates in whatever the method returns: 
@@ -134,6 +136,9 @@ end
 t = Time.now + 1
 wait_for(proc { Time.now > t }) { print '1 second passed' }
 ```
+
+
+<i id="yield_self-aka-then"></i>
 
 #### yield_self, a.k.a then
 
