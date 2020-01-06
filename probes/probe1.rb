@@ -1,9 +1,33 @@
-# frozen_string_literal: true
-class MyClass
-  def method1; end
+
+module M
+  class C
+    module M2
+      p Module.nesting   # => [M::C::M2, M::C, M]
+      p Module.constants # => [:M2, :C, a lot more...
+    end
+  end
 end
-obj = MyClass.new
-def obj.method2; end
+
+# X = 'constant 1'
+# module M
+#   X = 'constant 2'
+#   class C
+#     X = 'constant 3'
+#     p ::X         # => constant 1
+#     p ::M::C::X   # => constant 3
+#   end
+# end
+# p X               # => constant 1
+# p M::X            # => constant 2
+# p M::C::X         # => constant 3
+
+
+# # frozen_string_literal: true
+# class MyClass
+#   def method1; end
+# end
+# obj = MyClass.new
+# def obj.method2; end
 
 # p obj.singleton_class
 # p obj.class

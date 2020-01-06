@@ -1,4 +1,5 @@
 
+<i id="classes"></i>
 
 ## Classes
 
@@ -14,6 +15,8 @@ p Class.instance_methods(false) # [:allocate, :superclass, :new]
 ```
 
 So, if classes are also objects, instances of `Class`, could we just use `Class.new` to define a new class? Of course: See [Flat Scope](#flat-scope) section which contains a snippet that defines a our `Orc` using `Class.new`.
+
+<i id="inheritance"></i>
 
 ### Inheritance
 
@@ -73,8 +76,6 @@ Node.load_from_file('widget1.json').render
 
 ### The Ruby class hierarchy
 
-<!-- TODO: diagram of ruby class hierarch (baseObject, object, Class, Module, Kernel) -->
-
 The following diagram shows main classes of standard Ruby class hierarchy and a example method implemented by each.
 
 ![Figure Ruby class hierarchy](diagrams/ruby-class-hierarchy.png)
@@ -84,6 +85,8 @@ Some interesting considerations:
  * Although by default, new classes extends from `Object` the root class in the hierarchy is not `Object` but `BaseObject`.
  * `Class` extends `Module` so all classes are also modules.
 
+
+<i id="superclass"></i>
 
 ### Superclass
 
@@ -103,12 +106,5 @@ p MyClass.class.superclass.superclass # => Object
 ![Figure superclass](diagrams/ruby-class-hierarchy-superclass.png)
 
 
-### Constants
-
-TODO: pg 21
-
-TODO: filesystem-like analogy vs variables (in other languages constants are just like variables but will throw if re-assigned)
-TODO: class names are constants
-
-
+<div class="page-break"></div>
 

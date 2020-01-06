@@ -1,4 +1,6 @@
 
+<i id="the-singleton-scope"></i>
+
 ## The singleton scope
 
 Remember how we [said before](#methods) that an object's methods are actually part of the object's class and not the object itself? The implication is that objects of the same class share their methods. 
@@ -26,6 +28,8 @@ obj.method1 = function() {
 
 Can we accomplish this in Ruby? The answer to this question will give us the chance to learn Ruby language core features: *singleton methods* and *singleton classes*.
 
+<i id="singleton-methods"></i>
+
 ### Singleton methods
 
 The Ruby code equivalent to previous JavaScript snippet could be something like:
@@ -50,6 +54,8 @@ obj.define_singleton_method(:method1) { 'hello' }
 ```
 
 An interesting fact is that, **class methods are actually singleton methods of the class**. For example in `MyClass.my_class_method()`, `my_class_method` is actually a singleton method of `MyClass`.
+
+<i id="singleton-classes"></i>
 
 ### Singleton classes
 
@@ -106,3 +112,25 @@ def obj.method2; end
 As we said previously we represent the singleton class of an object named `obj` with `#obj`. Also, since classes are also objects, we represent the singleton class of a class named `MyClass` with `#MyClass`. As said before, class methods are methods of the class's singleton class, so class methods of `MyClass` are actually singleton methods of `#MyClass`. 
 
 The following diagram shows the relationship between `class`, `singleton_class` and `superclass`.
+
+![Singleton classes and superclass](diagrams/singleton_class-superclass.jpg)
+
+
+### The 7 Rules of the Ruby Object Model
+
+In this mix of classes, singleton classes, instance methods, class methods and singleton methods, a Ruby developer could have a hard time answering questions like: "Which method in this complicated hierarchy gets called first?" or "Can I call this method from that object?". The following seven rules describe the relationwhip between classes, singleton classes, instance methods, class methods and singleton methods and also gives a recipe on how method lookup works, now considering singleton classes and singleton methods:
+
+ 1. There is only one kind of object - be it a regular object or a module.
+ 2. There is only one kind of module - be it a regular module, a class or a singleton class. 
+ 3. There is only one kind of method, and it lives in a module - most often in a class.
+ 4. Every object, class included, has its own "real class", be it a regular class or a singleton class. 
+ 5. Every class, with the exception of `basicObject`, has exactly one ancestor - either a superclass or a module. This means you have a single chain of ancestors from any class up to `BasicObject`.
+ 6. The superclass of a singleton class of an object is the object's class. The superclass of the singleton class of a class is the singleton class of the class's superclass. (Yes, it sounds like a tongue twister, we tried to describe this in [Inheritance and singleton classes](#inheritance-and-singleton-classes)).
+ 7. When you call a method, Ruby goes "right" in the receiver's real class and then "up" the ancestors chain. That's all there's to know about the way Ruby finds methods. 
+
+<div class="page-break"></div>
+
+
+
+
+

@@ -1,7 +1,11 @@
 
+<i id="declarations"></i>
+
 ## Declarations
 
 We've already seen in [Scope Gates](#scope-gates), how to change the scope using `class` to declare classes and `def` to declare methods.
+
+<i id="open-class"></i>
 
 ### Open class
 
@@ -34,6 +38,8 @@ class String
 end
 p '  asd ss '.trim
 ```
+
+<i id="modules"></i>
 
 ### Modules
 
@@ -80,6 +86,8 @@ a.method1
 
 <!-- TODO: how to declare instance variables or class method from module ?  -->
 
+<i id="refinements"></i>
+
 ### Refinements
 
 In [Open Class](open-class) we shown how existing classes can be modified by just opening `class` several times. An important consequence is that any of this modifications will impact the rest of the code "globally" which could cause unexpected behaviors other part of the code that rely on a modified behavior. 
@@ -100,4 +108,7 @@ module IsolatedCode
 end
 p 'hello'.reverse    # "olleh"
 ```
+
+
+<div class="page-break"></div>
 

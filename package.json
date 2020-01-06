@@ -3,17 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "html": "npx marked -i ruby-object-model.md -o output/ruby-object-model.html && cp -r diagrams output",
-    "pdf": "npx md-to-pdf ruby-object-model.md output/ruby-object-model.pdf",
+    "html": "npx md-to-pdf --config-file config.js --as-html ruby-object-model.md docs/ruby-object-model.html",
+    "pdf": "npx md-to-pdf --config-file config.js ruby-object-model.md docs/ruby-object-model.pdf",
     "toc": "npx markdown-toc ruby-object-model.md -i",
-    "concat": "echo \"<!-- Auto generated with 'npm run concat' -->\" > ruby-object-model.md; cat src/intro.md >> ruby-object-model.md; cat src/basics.md >> ruby-object-model.md; cat src/classes.md >> ruby-object-model.md; cat src/scope.md >> ruby-object-model.md; cat src/declarations.md >> ruby-object-model.md; cat src/messages.md >> ruby-object-model.md; cat src/members.md >>  ruby-object-model.md; cat src/singleton.md >> ruby-object-model.md;",  
-    "all": "rm -rf output && mkdir -p output && npm run concat && npm run toc && npm run html && npm run pdf"
+    "concat": "echo \"<!-- Auto generated with 'npm run concat' -->\" > ruby-object-model.md; cat src/intro.md >> ruby-object-model.md; cat src/basics.md >> ruby-object-model.md; cat src/classes.md >> ruby-object-model.md; cat src/scope.md >> ruby-object-model.md; cat src/declarations.md >> ruby-object-model.md; cat src/messages.md >> ruby-object-model.md; cat src/members.md >>  ruby-object-model.md; cat src/singleton.md >> ruby-object-model.md; cat src/constants.md >> ruby-object-model.md;",  
+    "all": "rm -rf docs && mkdir -p docs && cp -r diagrams docs && npm run concat && npm run toc && npm run html && npm run pdf"
   },
   "author": "Sebastián Gurin",
   "license": "ISC",
   "devDependencies": {
     "markdown-toc": "^1.2.0",
-    "marked": "^0.8.0",
     "md-to-pdf": "^2.8.2"
   }
 }

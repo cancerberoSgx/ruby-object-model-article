@@ -9,6 +9,8 @@ Sebastián Gurin - [WyeWorks](wyeworks.com)
 
 <!-- tocstop -->
 
+<div class="page-break"></div>
+
 ## About this document
 
 When it comes to modeling a problem using an object oriented fashion, each language has its own peculiarities when it comes to, declaring objects and classes, code scope, object instantiation, inheritance, method lookup, etc. 
@@ -32,3 +34,6 @@ So, more than an Object Oriented Programming manual for Ruby, this document shou
 It assumes the reader has some background on object oriented programming such as the concepts of object, class, message, method and inheritance. Basic Ruby background is recommended although not needed since the code snippets are simple and commented.
 
 Aside, this is a millennial-friendly document: short paragraphs and code snippets right away!
+
+<div class="page-break"></div>
+

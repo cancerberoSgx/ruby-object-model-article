@@ -1,3 +1,6 @@
+
+<i id="the-basics"></i>
+
 ## The basics
 
 Let's start by explaining how to define a class and create new object instances in Ruby. In following sections we will be explaining exactly what's happening and how it works in detail, right now the objective is just making sure we know how to do it. 
@@ -19,6 +22,9 @@ The class defines two methods: `initialize` and `eat`. The method `initialize` i
 <!--    Relationship between objects, classes, methods and variables -->
 
 
+
+<i id="objects-and-classes"></i>
+
 ### Objects and classes
 
 **In Ruby everything is an object**, and **every object is associated with a class** of which we say it's an *instance* of. An object's class can be accessed through the method `class`. 
@@ -35,11 +41,18 @@ Note that in the previous code, the expression `Orc.new` is calling a method on 
 
 This will be described with more detail later, right now, the important thing to understand it that everything is an object which are always associated with a class. And that classes also are objects, instances of `Class`.
 
+
+
+<i id="instance-variables"></i>
+
 ### Instance variables
 
 Unlike in Java or other static languages, in Ruby there is no connection between an object's class and its instance variables. Instance variables just spring into existence when you assign them a value. In the previous example, the instance variable `@energy` is assigned only when the method `eat` is called. If it's not then the instance variable is never defined. In conclusion we could have Orcs with and without `@energy` instance variable. 
 
 You can think of the names and values of instance variables as keys and values in a hash. Both the keys and the values can be different for each object.
+
+
+<i id="methods"></i>
 
 ### Methods
 
@@ -67,3 +80,7 @@ In Ruby any object supports the message `:methods` which will return the array o
 ```
 
 ``` -->
+
+
+<div class="page-break"></div>
+

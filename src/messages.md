@@ -1,5 +1,7 @@
 
 
+<i id="messages-&-methods"></i>
+
 ## Messages & methods
 
 <!-- This section focus on Ruby ways of writing code that sends messages to an object. Later, in [Method Syntax](#method-syntax), the method declaration that handles the message is detailed.  -->
@@ -21,6 +23,10 @@ car = Car.new
 degrees = car.turn(:left)
 ```
 
+
+
+<i id="message-syntax"></i>
+
 ### Message syntax
 
 What's interesting of Ruby is that it support more than one flavor to write message expressions: 
@@ -37,6 +43,10 @@ result = my_object.players(serie_id: :serie1, filters: [a, b], round: 1)
 result = my_object.players serie_id: :serie1, filters: [a, b], round: 1
 ```
 
+
+
+<i id="method-syntax"></i>
+
 ### Method syntax
 
 Now how is it implemented each of the message syntax above ?
@@ -50,6 +60,10 @@ class Foo
   end
 end
 ```
+
+
+
+<i id="method-lookup"></i>
 
 ### Method lookup
 
@@ -71,6 +85,10 @@ MySubclass.ancestors # => [MySubclass, MyClass, Object, Kernel, BasicObject]
 ```
 
 Notice that `Kernel`, which is a module, not a class, is also included in the ancestors of `MySubclass`, just like any class.
+
+
+
+<i id="message-block"></i>
 
 ### Message block
 
@@ -138,4 +156,7 @@ p name_starts_with [{ name: 'andrew' }, { name: 'laura' }], 'a'
 ```
 
 Note: Ruby objects also support `tap` method but unlike `yield_self`, it yields `self` and returns `self`.
+
+<div class="page-break"></div>
+
 

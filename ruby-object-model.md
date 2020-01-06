@@ -19,7 +19,6 @@ Sebastián Gurin - [WyeWorks](wyeworks.com)
   * [Class methods and class variables](#class-methods-and-class-variables)
   * [The Ruby class hierarchy](#the-ruby-class-hierarchy)
   * [Superclass](#superclass)
-  * [Constants](#constants)
 - [Scope](#scope)
   * [self: the current object](#self-the-current-object)
   * [Scope Gates `class`, `module` and `def`](#scope-gates-class-module-and-def)
@@ -33,7 +32,7 @@ Sebastián Gurin - [WyeWorks](wyeworks.com)
   * [Message syntax](#message-syntax)
   * [Method syntax](#method-syntax)
   * [Method lookup](#method-lookup)
-  * [message block](#message-block)
+  * [Message block](#message-block)
     + [yield_self, a.k.a then](#yield_self-aka-then)
 - [More on class members and messages](#more-on-class-members-and-messages)
   * [Method visibility and private](#method-visibility-and-private)
@@ -47,8 +46,14 @@ Sebastián Gurin - [WyeWorks](wyeworks.com)
     + [`class << obj` - the singleton class scope gate](#class--obj---the-singleton-class-scope-gate)
   * [Method lookup and singleton classes](#method-lookup-and-singleton-classes)
   * [Inheritance and singleton classes](#inheritance-and-singleton-classes)
+  * [The 7 Rules of the Ruby Object Model](#the-7-rules-of-the-ruby-object-model)
+- [Appendix: Constants](#appendix-constants)
+  * [Constants paths](#constants-paths)
+  * [Module#constants, Module.constants and Module.nesting](#module%23constants-moduleconstants-and-modulenesting)
 
 <!-- tocstop -->
+
+<div class="page-break"></div>
 
 ## About this document
 
@@ -73,6 +78,12 @@ So, more than an Object Oriented Programming manual for Ruby, this document shou
 It assumes the reader has some background on object oriented programming such as the concepts of object, class, message, method and inheritance. Basic Ruby background is recommended although not needed since the code snippets are simple and commented.
 
 Aside, this is a millennial-friendly document: short paragraphs and code snippets right away!
+
+<div class="page-break"></div>
+
+
+<i id="the-basics"></i>
+
 ## The basics
 
 Let's start by explaining how to define a class and create new object instances in Ruby. In following sections we will be explaining exactly what's happening and how it works in detail, right now the objective is just making sure we know how to do it. 
@@ -94,6 +105,9 @@ The class defines two methods: `initialize` and `eat`. The method `initialize` i
 <!--    Relationship between objects, classes, methods and variables -->
 
 
+
+<i id="objects-and-classes"></i>
+
 ### Objects and classes
 
 **In Ruby everything is an object**, and **every object is associated with a class** of which we say it's an *instance* of. An object's class can be accessed through the method `class`. 
@@ -110,11 +124,18 @@ Note that in the previous code, the expression `Orc.new` is calling a method on 
 
 This will be described with more detail later, right now, the important thing to understand it that everything is an object which are always associated with a class. And that classes also are objects, instances of `Class`.
 
+
+
+<i id="instance-variables"></i>
+
 ### Instance variables
 
 Unlike in Java or other static languages, in Ruby there is no connection between an object's class and its instance variables. Instance variables just spring into existence when you assign them a value. In the previous example, the instance variable `@energy` is assigned only when the method `eat` is called. If it's not then the instance variable is never defined. In conclusion we could have Orcs with and without `@energy` instance variable. 
 
 You can think of the names and values of instance variables as keys and values in a hash. Both the keys and the values can be different for each object.
+
+
+<i id="methods"></i>
 
 ### Methods
 
@@ -143,6 +164,12 @@ In Ruby any object supports the message `:methods` which will return the array o
 
 ``` -->
 
+
+<div class="page-break"></div>
+
+
+<i id="classes"></i>
+
 ## Classes
 
 As said in the previous section, methods of an object are actually instance methods of its class. So in our example, `fred` methods like `eat` are actually *instance methods* of `Orc`. The interesting part is that the same applies to `Orc` viewed as an object. Methods of `Orc`, like `Orc.new`, are *instance methods* of `Class`:
@@ -157,6 +184,8 @@ p Class.instance_methods(false) # [:allocate, :superclass, :new]
 ```
 
 So, if classes are also objects, instances of `Class`, could we just use `Class.new` to define a new class? Of course: See [Flat Scope](#flat-scope) section which contains a snippet that defines a our `Orc` using `Class.new`.
+
+<i id="inheritance"></i>
 
 ### Inheritance
 
@@ -216,8 +245,6 @@ Node.load_from_file('widget1.json').render
 
 ### The Ruby class hierarchy
 
-<!-- TODO: diagram of ruby class hierarch (baseObject, object, Class, Module, Kernel) -->
-
 The following diagram shows main classes of standard Ruby class hierarchy and a example method implemented by each.
 
 ![Figure Ruby class hierarchy](diagrams/ruby-class-hierarchy.png)
@@ -227,6 +254,8 @@ Some interesting considerations:
  * Although by default, new classes extends from `Object` the root class in the hierarchy is not `Object` but `BaseObject`.
  * `Class` extends `Module` so all classes are also modules.
 
+
+<i id="superclass"></i>
 
 ### Superclass
 
@@ -246,17 +275,11 @@ p MyClass.class.superclass.superclass # => Object
 ![Figure superclass](diagrams/ruby-class-hierarchy-superclass.png)
 
 
-### Constants
-
-TODO: pg 21
-
-TODO: filesystem-like analogy vs variables (in other languages constants are just like variables but will throw if re-assigned)
-TODO: class names are constants
+<div class="page-break"></div>
 
 
 
-
-
+<i id="scope"></i>
 
 ## Scope
 
@@ -265,6 +288,9 @@ Although the concept of *scope* might seem not directly related with objects and
 Similar to other scripting languages like JavaScript, understanding the rules for the scope on which the code runs is basic to write object oriented code in Ruby. 
 
 What do we exactly refer to when we say "scope" ? At *any* part of Ruby code, we say that at that moment, the **scope is all the names we can reference** from there, like local variables, instance and class variables, methods, constants, classes, modules, etc.
+
+
+<i id="self-the-current-object"></i>
 
 ### self: the current object
 
@@ -280,6 +306,9 @@ b = to_s
 ```
 
 As you can see in the second line, we send a message `to_s` without providing the target object, so the message will be actually be dispatched by `self`, the current object.
+
+
+<i id="scope-gates-class-module-and-def"></i>
 
 ### Scope Gates `class`, `module` and `def`
 
@@ -330,6 +359,9 @@ Notice how:
  * Inside a method declaration, `self` references *the instance*, similar to the `this` keyword in other programming languages. 
  * Inside a class declaration and outside a method, `self` references *the class*.
 
+
+<i id="flat-scope"></i>
+
 ### Flat Scope
 
 Using Scope Gates like `class` has many advantages since the inner code runs with a fresh scope. But sometimes we need to access outer local variables from inside a class which is not possible if using scope gates as shown in the previous section. 
@@ -350,9 +382,18 @@ end
 TODO: more about Class.new and define_method : links or show the signatures
 
 
+
+<div class="page-break"></div>
+
+
+
+<i id="declarations"></i>
+
 ## Declarations
 
 We've already seen in [Scope Gates](#scope-gates), how to change the scope using `class` to declare classes and `def` to declare methods.
+
+<i id="open-class"></i>
 
 ### Open class
 
@@ -385,6 +426,8 @@ class String
 end
 p '  asd ss '.trim
 ```
+
+<i id="modules"></i>
 
 ### Modules
 
@@ -431,6 +474,8 @@ a.method1
 
 <!-- TODO: how to declare instance variables or class method from module ?  -->
 
+<i id="refinements"></i>
+
 ### Refinements
 
 In [Open Class](open-class) we shown how existing classes can be modified by just opening `class` several times. An important consequence is that any of this modifications will impact the rest of the code "globally" which could cause unexpected behaviors other part of the code that rely on a modified behavior. 
@@ -453,6 +498,11 @@ p 'hello'.reverse    # "olleh"
 ```
 
 
+<div class="page-break"></div>
+
+
+
+<i id="messages-&-methods"></i>
 
 ## Messages & methods
 
@@ -475,6 +525,10 @@ car = Car.new
 degrees = car.turn(:left)
 ```
 
+
+
+<i id="message-syntax"></i>
+
 ### Message syntax
 
 What's interesting of Ruby is that it support more than one flavor to write message expressions: 
@@ -491,6 +545,10 @@ result = my_object.players(serie_id: :serie1, filters: [a, b], round: 1)
 result = my_object.players serie_id: :serie1, filters: [a, b], round: 1
 ```
 
+
+
+<i id="method-syntax"></i>
+
 ### Method syntax
 
 Now how is it implemented each of the message syntax above ?
@@ -504,6 +562,10 @@ class Foo
   end
 end
 ```
+
+
+
+<i id="method-lookup"></i>
 
 ### Method lookup
 
@@ -526,7 +588,11 @@ MySubclass.ancestors # => [MySubclass, MyClass, Object, Kernel, BasicObject]
 
 Notice that `Kernel`, which is a module, not a class, is also included in the ancestors of `MySubclass`, just like any class.
 
-### message block
+
+
+<i id="message-block"></i>
+
+### Message block
 
 What's unusual in Ruby compared to other languages is that besides the list of arguments, methods also accepts a code block that they can `yield` whatever times they need. For example, in the expression `[1, 2, 3].each() { |item| p item}` we are invoking the method `each` with no arguments and passing a message block right after the call expression. `Array.each` will execute this block passing each of the array's items as argument. 
 
@@ -593,6 +659,9 @@ p name_starts_with [{ name: 'andrew' }, { name: 'laura' }], 'a'
 
 Note: Ruby objects also support `tap` method but unlike `yield_self`, it yields `self` and returns `self`.
 
+<div class="page-break"></div>
+
+
 
 
 ## More on class members and messages
@@ -617,6 +686,9 @@ Foo.new.public_method
 Running the snippet will throw `NoMethodError: private method 'private_method' called [...]`. To solve the problem we just need to replace `self.private_method` with `private_method` - in other words, call the private method with the implicit `self` receiver. 
 
 
+
+<i id="accessors"></i>
+
 ### Accessors
 
 TODO
@@ -626,6 +698,8 @@ attr :foo
 attr_writable :bar
 etc
 ```
+
+<i id="class-macros"></i>
 
 ### Class macros
 
@@ -660,6 +734,8 @@ elf.foo2 # => 'method' called
 <!-- Ruby's `Module` class, for example, comes with a variety of class-level utilities to control how user access object's attributes as described . The expression `attr :foo` for example -->
 
 
+<i id="accessor-methods"></i>
+
 ### Accessor methods 
 
 Ruby supports method definition to handle attribute getter and assignation. 
@@ -677,6 +753,8 @@ bar = Bar.new
 bar.foo = 2
 p bar.foo
 ```
+
+<i id="operator-overloading"></i>
 
 ### Operator overloading
 
@@ -705,13 +783,13 @@ b = ComplexNumber.new(2, 2)
 print a + b # => ComplexNumber(3, 3)
 ```
 
-<!-- TODO
- * relationship between operators and methods 
- * operators are methods
- * can be overridde - even Number ?  -->
+
+
+<div class="page-break"></div>
 
 
 
+<i id="the-singleton-scope"></i>
 
 ## The singleton scope
 
@@ -740,6 +818,8 @@ obj.method1 = function() {
 
 Can we accomplish this in Ruby? The answer to this question will give us the chance to learn Ruby language core features: *singleton methods* and *singleton classes*.
 
+<i id="singleton-methods"></i>
+
 ### Singleton methods
 
 The Ruby code equivalent to previous JavaScript snippet could be something like:
@@ -764,6 +844,8 @@ obj.define_singleton_method(:method1) { 'hello' }
 ```
 
 An interesting fact is that, **class methods are actually singleton methods of the class**. For example in `MyClass.my_class_method()`, `my_class_method` is actually a singleton method of `MyClass`.
+
+<i id="singleton-classes"></i>
 
 ### Singleton classes
 
@@ -820,3 +902,86 @@ def obj.method2; end
 As we said previously we represent the singleton class of an object named `obj` with `#obj`. Also, since classes are also objects, we represent the singleton class of a class named `MyClass` with `#MyClass`. As said before, class methods are methods of the class's singleton class, so class methods of `MyClass` are actually singleton methods of `#MyClass`. 
 
 The following diagram shows the relationship between `class`, `singleton_class` and `superclass`.
+
+![Singleton classes and superclass](diagrams/singleton_class-superclass.jpg)
+
+
+### The 7 Rules of the Ruby Object Model
+
+In this mix of classes, singleton classes, instance methods, class methods and singleton methods, a Ruby developer could have a hard time answering questions like: "Which method in this complicated hierarchy gets called first?" or "Can I call this method from that object?". The following seven rules describe the relationwhip between classes, singleton classes, instance methods, class methods and singleton methods and also gives a recipe on how method lookup works, now considering singleton classes and singleton methods:
+
+ 1. There is only one kind of object - be it a regular object or a module.
+ 2. There is only one kind of module - be it a regular module, a class or a singleton class. 
+ 3. There is only one kind of method, and it lives in a module - most often in a class.
+ 4. Every object, class included, has its own "real class", be it a regular class or a singleton class. 
+ 5. Every class, with the exception of `basicObject`, has exactly one ancestor - either a superclass or a module. This means you have a single chain of ancestors from any class up to `BasicObject`.
+ 6. The superclass of a singleton class of an object is the object's class. The superclass of the singleton class of a class is the singleton class of the class's superclass. (Yes, it sounds like a tongue twister, we tried to describe this in [Inheritance and singleton classes](#inheritance-and-singleton-classes)).
+ 7. When you call a method, Ruby goes "right" in the receiver's real class and then "up" the ancestors chain. That's all there's to know about the way Ruby finds methods. 
+
+<div class="page-break"></div>
+
+
+
+
+
+
+
+## Appendix: Constants
+
+In Ruby, any reference that **starts with an uppercase letter**, including name of classes and modules, is a *constant*. Ruby constants are very peculiar when compared to other programming language's constants. 
+
+First of all, unlike other programming languages, Ruby constants can be changed and reassigned. For example, try to re-assign constant `String` to break Ruby beyond repair. 
+
+Second, class names and module names are constants. In the following example both `MyClass` and `my_class` references to the same instance of `Class` with the only difference being that `MyClass` is a constant and `my_class` a local variable:
+
+```rb
+class MyClass
+end
+my_class = MyClass
+```
+
+So, if we can change the value of a constant, how are they different from a variable? The only important difference has to do with their scope. 
+
+All the constants in a program are arranged in a tree similar to a file system where modules (and classes) are *directories* and regular constants are *files*. Like in a file system, we can have multiple files with the same name as long as they live in different directories. We can even refer to constants by their *path*, as we would do with a file. 
+
+### Constants paths
+
+In the following example we have some modules and classes which defines constants and reference inner and outer constants by their paths. Notice that constants' paths use a double colon as a separator (similar to C++ scope operator). Also, we can reference a constant by its *absolute path* by prefixing the constant path with `::` : 
+
+```rb
+X = 'constant 1'
+module M
+  X = 'constant 2'
+  class C
+    X = 'constant 3'
+    p ::X         # => constant 1
+    p ::M::C::X   # => constant 3
+  end
+end
+p X               # => constant 1
+p M::X            # => constant 2
+p M::C::X         # => constant 3
+```
+
+### Module#constants, Module.constants and Module.nesting
+
+Ruby's `Module` class aso provides the instance method `Module#constants` which returns all constants in the current scope, analogous to the `ls` UNIX command. 
+
+Also, the class method `Module.constants` will return all the top-level constants in the current program, including class names. 
+
+Finally, we can use the class method `Module.nesting` to get the *current path*:
+
+```rb
+module M
+  class C
+    module M2
+      p Module.nesting   # => [M::C::M2, M::C, M]
+      p Module.constants # => [:M2, :C, a lot more...
+    end
+  end
+end
+```
+
+
+<div class="page-break"></div>
+

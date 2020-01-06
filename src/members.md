@@ -22,6 +22,9 @@ Foo.new.public_method
 Running the snippet will throw `NoMethodError: private method 'private_method' called [...]`. To solve the problem we just need to replace `self.private_method` with `private_method` - in other words, call the private method with the implicit `self` receiver. 
 
 
+
+<i id="accessors"></i>
+
 ### Accessors
 
 TODO
@@ -31,6 +34,8 @@ attr :foo
 attr_writable :bar
 etc
 ```
+
+<i id="class-macros"></i>
 
 ### Class macros
 
@@ -65,6 +70,8 @@ elf.foo2 # => 'method' called
 <!-- Ruby's `Module` class, for example, comes with a variety of class-level utilities to control how user access object's attributes as described . The expression `attr :foo` for example -->
 
 
+<i id="accessor-methods"></i>
+
 ### Accessor methods 
 
 Ruby supports method definition to handle attribute getter and assignation. 
@@ -82,6 +89,8 @@ bar = Bar.new
 bar.foo = 2
 p bar.foo
 ```
+
+<i id="operator-overloading"></i>
 
 ### Operator overloading
 
@@ -110,10 +119,8 @@ b = ComplexNumber.new(2, 2)
 print a + b # => ComplexNumber(3, 3)
 ```
 
-<!-- TODO
- * relationship between operators and methods 
- * operators are methods
- * can be overridde - even Number ?  -->
 
+
+<div class="page-break"></div>
 
 

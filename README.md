@@ -1,6 +1,11 @@
-This is a small article about "understanding the Ruby object model"
+This is a small article about "understanding the Ruby object model". See output:
 
-The actual document is `ruby-object-model.md`
+ *[.pdf]() 
+ *[.html]() 
+
+
+
+The actual document is `ruby-object-model.md` which is auto generated from src/* with `npm run concat`.
 
 To generate PDF and HTML versions:
 
@@ -9,4 +14,4 @@ npm i # only needed once
 npm run all
 ````
 
-That should generate `output/ruby-object-model.html` and `output/ruby-object-model.pdf`
+That should generate `docs/ruby-object-model.html` and `docs/ruby-object-model.pdf`
