@@ -145,3 +145,7 @@ p hash.display  # => hello
 ```
 
 And if you need even more control, we could even use `undef_method` to remove existing methods.
+
+
+<div class="page-break"></div>
+

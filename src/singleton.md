@@ -71,7 +71,6 @@ end
 
 Remember how we said `class` is a scope gate ? Well in this case the expression `class << obj` opens the scope to `obj`'s singleton class the same way `class C` opens the scope to a "normal" `C` class. Methods and instance variables defined inside will belong to `obj`'s singleton class. 
 
-TODO: `obj.singleton_class` extends `obj.class`
 
 
 

@@ -107,8 +107,6 @@ Orc = Class.new do
 end
 ```
 
-TODO: more about Class.new and define_method : links or show the signatures
-
 
 
 <div class="page-break"></div>

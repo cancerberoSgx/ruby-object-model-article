@@ -151,9 +151,9 @@ github.com style (c) Vasily Polovnyov <vast@whiteants.net>
 </li>
 <li><a href="#more-on-class-members-and-messages">More on class members and messages</a><ul>
 <li><a href="#method-visibility-and-private">Method visibility and private</a></li>
+<li><a href="#accessor-methods">Accessor methods</a></li>
 <li><a href="#accessors">Accessors</a></li>
 <li><a href="#class-macros">Class macros</a></li>
-<li><a href="#accessor-methods">Accessor methods</a></li>
 <li><a href="#operator-overloading">Operator overloading</a></li>
 </ul>
 </li>
@@ -394,8 +394,7 @@ Orc = Class.new <span class="hljs-keyword">do</span>
   define_method <span class="hljs-symbol">:eat</span> <span class="hljs-keyword">do</span>
     @energy = initial_energy
   <span class="hljs-keyword">end</span>
-<span class="hljs-keyword">end</span></code></pre><p>TODO: more about Class.new and define_method : links or show the signatures</p>
-<div class="page-break"></div>
+<span class="hljs-keyword">end</span></code></pre><div class="page-break"></div>
 
 
 
@@ -569,16 +568,45 @@ private
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">private_method</span>;</span> <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span>
 Foo.new.public_method</code></pre><p>Running the snippet will throw <code>NoMethodError: private method 'private_method' called [...]</code>. To solve the problem we just need to replace <code>self.private_method</code> with <code>private_method</code> - in other words, call the private method with the implicit <code>self</code> receiver. </p>
-<p><i id="accessors"></i></p>
+<p><i id="accessor-methods"></i></p>
+<h3>Accessor methods</h3>
+<p>Ruby supports method definition to handle attribute getter and assignation. </p>
+<pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Bar</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo=</span><span class="hljs-params">(value)</span></span>
+    @foo = value
+  <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>
+    @foo
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+bar = Bar.new
+bar.foo = <span class="hljs-number">2</span>
+p bar.foo</code></pre><p><i id="accessors"></i></p>
 <h3>Accessors</h3>
-<p>TODO</p>
-<pre><code class="hljs plaintext">attr :foo
-attr_writable :bar
-etc</code></pre><p><i id="class-macros"></i></p>
+<p>Imagine we are writing a class <code>MyClass</code> with variables <code>foo</code> and <code>bar</code> and we want them to be available so users of our class can access or assign them like this:</p>
+<pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span></span>
+    @foo = <span class="hljs-number">1</span>
+    @bar = <span class="hljs-number">2</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+obj = MyClass.new
+p obj.foo      <span class="hljs-comment"># throws</span>
+obj.bar = <span class="hljs-number">1</span>    <span class="hljs-comment"># throws</span></code></pre><p>Instead of manually write accessor methods <code>foo</code>, <code>foo=</code>, <code>bar</code> and <code>bar=</code> as we shown in the <a href="#accessor-methods">previous section</a>, we could instruct Ruby to auto generate them automatically by using <code>Module#attr_*</code> methods. <code>Module#attr_reader</code> generates the readers, this is, <code>foo</code> and <code>bar</code>. <code>Module#attr_writer</code> generates the writers, this is, <code>foo=</code> and <code>bar=</code>. Finally <code>Module#attr_accessor</code> generate both: </p>
+<pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+  <span class="hljs-keyword">attr_accessor</span> <span class="hljs-symbol">:foo</span>, <span class="hljs-symbol">:bar</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span></span>
+    @foo = <span class="hljs-number">1</span>
+    @bar = <span class="hljs-number">2</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+obj = MyClass.new
+p obj.foo      <span class="hljs-comment"># works</span>
+obj.bar = <span class="hljs-number">1</span>    <span class="hljs-comment"># works</span></code></pre><p><i id="class-macros"></i></p>
 <h3>Class macros</h3>
 <p>The ability to run any code inside a class definition, plus its friendly syntax allow Ruby programmers to conceptualize what we call <strong>class macros</strong>. Formally, they are statements inside the class scope calling class methods to perform operations on the class itself, often using Ruby’s meta programming API to modify the class behavior. </p>
-<p>When we described <a href="#accessors">accessors</a>, we where actually talking about <code>Module</code>‘s class methods that are called in statements inside the class definition. The expression <code>attr :foo</code> for example is actually calling <code>Module.attr()</code> method. </p>
-<p>For Ruby newcomers, expressions like <code>attr :foo</code> in the middle of class definitions could look like a syntax thing, but actually there’s no special syntax at all, we are just calling a class method that will modify the class to support <code>attr</code> semantics.</p>
+<p>When we described <a href="#accessors">accessors</a>, we where actually talking about <code>Module</code>‘s class methods that are called in statements inside the class definition. The expression <code>attr_accessor :foo</code> for example is actually calling <code>Module#attr_accessor</code> method. </p>
+<p>For Ruby newcomers, expressions like <code>attr_accessor :foo</code> in the middle of class definitions could look like a syntax thing, but actually there’s no special syntax at all, we are just calling a class method that will modify the class to support <code>attr_accessor</code> semantics.</p>
 <p>Let’s write our own class macro <code>second</code>, that, given a method named <code>name</code> it will create a second method named <code>"#{name}2"</code> that calls the original method and log the call:</p>
 <pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Base</span></span>
   <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">self</span>.<span class="hljs-title">second</span><span class="hljs-params">(*methods)</span></span>
@@ -599,20 +627,7 @@ elf.foo
 elf.foo2 <span class="hljs-comment"># =&gt; 'method' called</span></code></pre><!-- Ruby's `Module` class, for example, comes with a variety of class-level utilities to control how user access object's attributes as described . The expression `attr :foo` for example -->
 
 
-<p><i id="accessor-methods"></i></p>
-<h3>Accessor methods</h3>
-<p>Ruby supports method definition to handle attribute getter and assignation. </p>
-<pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Bar</span></span>
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo=</span><span class="hljs-params">(value)</span></span>
-    @foo = value
-  <span class="hljs-keyword">end</span>
-  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">foo</span></span>
-    @foo
-  <span class="hljs-keyword">end</span>
-<span class="hljs-keyword">end</span>
-bar = Bar.new
-bar.foo = <span class="hljs-number">2</span>
-p bar.foo</code></pre><p><i id="operator-overloading"></i></p>
+<p><i id="operator-overloading"></i></p>
 <h3>Operator overloading</h3>
 <p>Ruby permits operator overloading, allowing one to define how an operator shall be used in a particular program. For example a <code>+</code> operator can be define in such a way to perform subtraction instead addition and vice versa. The operators that can be overloaded are <code>+</code>, <code>-</code>, <code>/</code>, <code>*</code>, <code>**</code>, <code>%</code>, etc and some operators that can not be overloaded are <code>&amp;</code>, <code>&amp;&amp;</code>, <code>|</code>, <code>||</code>, <code>()</code>, <code>{}</code>, <code>~</code>, etc.</p>
 <p>Operator functions are same as normal functions. The only differences are, name of an operator function is always symbol of operator followed operator object. Operator functions are called when the corresponding operator is used. Operator overloading is not commutative that means that <code>3 + a</code> is not same as <code>a + 3</code>.</p>
@@ -668,7 +683,6 @@ obj.define_singleton_method(<span class="hljs-symbol">:method1</span>) { <span c
     <span class="hljs-string">'hello'</span>
   <span class="hljs-keyword">end</span>
 <span class="hljs-keyword">end</span></code></pre><p>Remember how we said <code>class</code> is a scope gate ? Well in this case the expression <code>class &lt;&lt; obj</code> opens the scope to <code>obj</code>‘s singleton class the same way <code>class C</code> opens the scope to a “normal” <code>C</code> class. Methods and instance variables defined inside will belong to <code>obj</code>‘s singleton class. </p>
-<p>TODO: <code>obj.singleton_class</code> extends <code>obj.class</code></p>
 <h3>Method lookup and singleton classes</h3>
 <p>Previously, in <a href="#method-lookup">Method lookup</a>, we explained how the Ruby interpreter finds a method. Well, that was without considering singleton classes. Now that we know they exists, the missing part is the role of singleton methods in this scenario. </p>
 <p>Heads up: We represent the singleton class of an object <code>obj</code> with <code>#obj</code>.</p>
@@ -787,6 +801,10 @@ p hash.display  <span class="hljs-comment"># =&gt; #&lt;MyHash:0x00007fce330638b
 hash = MyHash.new
 hash.display = <span class="hljs-string">'hello'</span>
 p hash.display  <span class="hljs-comment"># =&gt; hello</span></code></pre><p>And if you need even more control, we could even use <code>undef_method</code> to remove existing methods.</p>
+<div class="page-break"></div>
+
+
+
 <h2>Appendix: Constants</h2>
 <p>In Ruby, any reference that <strong>starts with an uppercase letter</strong>, including name of classes and modules, is a <em>constant</em>. Ruby constants are very peculiar when compared to other programming language’s constants. </p>
 <p>First of all, unlike other programming languages, Ruby constants can be changed and reassigned. For example, try to re-assign constant <code>String</code> to break Ruby beyond repair. </p>
