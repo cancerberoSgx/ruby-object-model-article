@@ -1,12 +1,38 @@
-
-module M
-  class C
-    module M2
-      p Module.nesting   # => [M::C::M2, M::C, M]
-      p Module.constants # => [:M2, :C, a lot more...
+class MyHash < BasicObject
+  def initialize
+    @data = {}
+  end
+  def method_missing(method, *args)
+    name = method.to_s
+    if name.end_with? '='
+      @data[name.slice(0, name.length - 1)] = args[0]
+    else
+      @data[name]
     end
   end
 end
+hash = MyHash.new
+hash.display = 'hello'
+p hash.display  # => hello
+# p hash.foo # => 1
+
+# class MyClass
+#   def method_missing(method, *args)
+#     p "You called: #{method}(#{args.join(', ')})"
+#     p "(You also passed it a block)" if block_given?
+#   end
+# end
+# obj = MyClass.new
+# obj.non_existent_method('a', 3.14) { }
+
+# module M
+#   class C
+#     module M2
+#       p Module.nesting   # => [M::C::M2, M::C, M]
+#       p Module.constants # => [:M2, :C, a lot more...
+#     end
+#   end
+# end
 
 # X = 'constant 1'
 # module M
@@ -20,7 +46,6 @@ end
 # p X               # => constant 1
 # p M::X            # => constant 2
 # p M::C::X         # => constant 3
-
 
 # # frozen_string_literal: true
 # class MyClass

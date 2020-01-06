@@ -139,6 +139,15 @@ Monokai style - ported by Luigi Maselli - http://grigio.org
 <li><a href="#the-7-rules-of-the-ruby-object-model">The 7 Rules of the Ruby Object Model</a></li>
 </ul>
 </li>
+<li><a href="#appendix-missing-methods-more-on-methods">Appendix: missing methods, More on methods</a><ul>
+<li><a href="#method-objects">Method objects</a></li>
+<li><a href="#dynamic-methods">Dynamic methods</a></li>
+<li><a href="#method_missing">method_missing</a></li>
+<li><a href="#ghost-methods-and-dynamic-proxies">Ghost methods and dynamic proxies</a></li>
+<li><a href="#respond_to_missing">respond_to_missing</a></li>
+<li><a href="#blank-slates">Blank slates</a></li>
+</ul>
+</li>
 <li><a href="#appendix-constants">Appendix: Constants</a><ul>
 <li><a href="#constants-paths">Constants paths</a></li>
 <li><a href="#module%23constants-moduleconstants-and-modulenesting">Module#constants, Module.constants and Module.nesting</a></li>
@@ -691,8 +700,86 @@ obj = MyClass.new
 
 
 
-
-
+<h2>Appendix: missing methods, More on methods</h2>
+<p>This section describes techniques available in Ruby regarding method dispatch, proxies and hooks. It’s somewhat related with what we call meta programming. </p>
+<h3>Method objects</h3>
+<p>Methods can also be manipulated as objects by using <code>Kernel#method</code> method. It will return the method itself as a <code>Method</code> object that can be later executed using <code>Method#call</code>.</p>
+<pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span><span class="hljs-params">(value)</span></span>
+    @x = value
+  <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">my_method</span></span>
+    @x
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+object = MyClass.new(<span class="hljs-number">1</span>)
+m = object.method <span class="hljs-symbol">:my_method</span>
+m.call <span class="hljs-comment"># =&gt; 1</span></code></pre><p>The same applies to singleton methods by using <code>Kernel#singleton_method</code>.</p>
+<h3>Dynamic methods</h3>
+<p>We can call any method dynamically using <code>Object#send</code>, even private methods: </p>
+<pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">my_method</span><span class="hljs-params">(my_arg)</span></span>
+    my_arg*<span class="hljs-number">2</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+object = MyClass.new
+p object.send(<span class="hljs-symbol">:my_method</span>, <span class="hljs-number">2</span>) <span class="hljs-comment"># =&gt; 4</span>
+p <span class="hljs-number">1</span>.send(<span class="hljs-symbol">:+</span>, <span class="hljs-number">2</span>)              <span class="hljs-comment"># =&gt; 3</span></code></pre><p>And regarding dynamically defining methods, we’ve already done that in <a href="#flat-scope">Section Flat Scope</a> using <code>define_method</code>.</p>
+<p><i id="method_missing"></i></p>
+<h3>method_missing</h3>
+<p>In Ruby there’s no compiler to verify that a method actually exists when we call it. If we call a method that doesn’t exists there will be a runtime error <code>NoMethodError</code>. When Ruby can’t find a method while looking up through the class hierarchy it will end up calling the private method <code>BaseObject#method_missing</code> which by default throws an error like <code>NoMethodError: undefined method 'my_method' for #&lt;MyClass&gt;</code>. </p>
+<p>So, it’s possible to override <code>BaseObject#method_missing</code> to implement custom behavior when this happens: </p>
+<pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyClass</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method_missing</span><span class="hljs-params">(method, *args)</span></span>
+    p <span class="hljs-string">"You called: <span class="hljs-subst">#{method}</span>(<span class="hljs-subst">#{args.join(<span class="hljs-string">', '</span>)}</span>)"</span>
+    p <span class="hljs-string">"(You also passed it a block)"</span> <span class="hljs-keyword">if</span> block_given?
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+obj = MyClass.new
+obj.non_existent_method(<span class="hljs-string">'a'</span>, <span class="hljs-number">3.14</span>) { }</code></pre><p>It will print:</p>
+<pre><code class="hljs plaintext">You called: non_existent_method(a, 3.14)
+(You also passed it a block)</code></pre><h3>Ghost methods and dynamic proxies</h3>
+<p>As seen in previous section, using by overriding <code>BaseObject#method_missing</code> we can implement methods such as, from the point of view of the caller they will look like simple method calls, but on the receiver’s side they have no corresponding method implementation. This technique is often called <em>Ghost Method</em>. </p>
+<p>Let’s implement a class which purpose is to be a Hash-like structure, but unlike Ruby’s <code>Hash</code>, properties can be accessed using the accessor operator <code>.</code> and assigned using <code>=</code>:</p>
+<pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyHash</span></span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span></span>
+    @data = {}
+  <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method_missing</span><span class="hljs-params">(method, *args)</span></span>
+    name = method.to_s
+    <span class="hljs-keyword">if</span> name.end_with? <span class="hljs-string">'='</span>
+      @data[name.slice(<span class="hljs-number">0</span>, name.length - <span class="hljs-number">1</span>)] = args[<span class="hljs-number">0</span>]
+    <span class="hljs-keyword">else</span>
+      @data[name]
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+hash = MyHash.new
+hash.foo = <span class="hljs-number">1</span>
+p hash.foo <span class="hljs-comment"># =&gt; 1</span></code></pre><h3>respond_to_missing</h3>
+<p>Since Ruby object’s also support the method <code>respond_to?</code> for knowing if an object understand a certain method, when implementing ghost methods, we might want to include them in <code>respond_to?</code>. For this we need to override <code>respond_to_missing</code> to return our ghost method names.</p>
+<p>In the past, Ruby coders used to override <code>respond_to?</code> directly but now that practice is considered somewhat dirty and overriding <code>respond_to_missing</code> is preferred.</p>
+<h3>Blank slates</h3>
+<p>When implementing dynamic proxies, like our <code>MyHash</code> class shown above, existing <code>Object</code> methods (which are not few) could collide with our ghost methods. In our example, since <code>Object</code> already has a method called <code>display</code>, hash keys named <code>display</code> won’t work as expected: </p>
+<pre><code class="hljs rb">hash = MyHash.new
+hash.display = <span class="hljs-string">'hello'</span>
+p hash.display  <span class="hljs-comment"># =&gt; #&lt;MyHash:0x00007fce330638b8&gt;nil</span></code></pre><p>A way to workaround this problem is to extend BaseObject instead of <code>Object</code> since it has only a couple of instance methods so these kind of collisions are less probable:</p>
+<pre><code class="hljs rb"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">MyHash</span> &lt; BaseObject</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">initialize</span></span>
+    @data = {}
+  <span class="hljs-keyword">end</span>
+  <span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">method_missing</span><span class="hljs-params">(method, *args)</span></span>
+    name = method.to_s
+    <span class="hljs-keyword">if</span> name.end_with? <span class="hljs-string">'='</span>
+      @data[name.slice(<span class="hljs-number">0</span>, name.length - <span class="hljs-number">1</span>)] = args[<span class="hljs-number">0</span>]
+    <span class="hljs-keyword">else</span>
+      @data[name]
+    <span class="hljs-keyword">end</span>
+  <span class="hljs-keyword">end</span>
+<span class="hljs-keyword">end</span>
+hash = MyHash.new
+hash.display = <span class="hljs-string">'hello'</span>
+p hash.display  <span class="hljs-comment"># =&gt; hello</span></code></pre><p>And if you need even more control, we could even use <code>undef_method</code> to remove an existing method.</p>
 <h2>Appendix: Constants</h2>
 <p>In Ruby, any reference that <strong>starts with an uppercase letter</strong>, including name of classes and modules, is a <em>constant</em>. Ruby constants are very peculiar when compared to other programming language’s constants. </p>
 <p>First of all, unlike other programming languages, Ruby constants can be changed and reassigned. For example, try to re-assign constant <code>String</code> to break Ruby beyond repair. </p>
