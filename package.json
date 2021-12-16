@@ -13,6 +13,6 @@
   "license": "ISC",
   "devDependencies": {
     "markdown-toc": "^1.2.0",
-    "md-to-pdf": "^2.8.2"
+    "md-to-pdf": "^5.0.0"
   }
 }
